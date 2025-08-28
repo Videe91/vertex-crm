@@ -10,3 +10,6 @@ restartPolicyType = "on_failure"
 [variables]
 NODE_ENV = "production"
 PORT = "3000"
+
+[experimental]
+configFilePath = "nixpacks.toml"
