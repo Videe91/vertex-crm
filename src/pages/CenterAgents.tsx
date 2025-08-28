@@ -30,6 +30,8 @@ interface Agent {
   team_id?: number
   manager_id?: number
   temp_password?: string
+  first_login?: number
+  current_password?: string
   status: 'active' | 'inactive' | 'training'
   created_at: string
   last_login?: string
@@ -607,11 +609,13 @@ const CenterAgents: React.FC = () => {
                         <td className="px-2 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <div className={`text-sm font-mono ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                              {agent.temp_password ? (
+                              {agent.first_login === 1 && agent.temp_password ? (
                                 passwordVisibility[agent.id] ? agent.temp_password : '••••••••'
-                              ) : 'Not set'}
+                              ) : agent.current_password ? (
+                                passwordVisibility[agent.id] ? agent.current_password : '••••••••'
+                              ) : agent.first_login === 0 ? 'Set' : 'Not set'}
                             </div>
-                            {agent.temp_password && (
+                            {((agent.first_login === 1 && agent.temp_password) || agent.current_password) && (
                               <button
                                 onClick={() => togglePasswordVisibility(agent.id)}
                                 className={`p-1 rounded transition-colors ${

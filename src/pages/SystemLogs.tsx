@@ -3,21 +3,17 @@ import {
   FileText, 
   Filter, 
   Search, 
-  Download, 
-  Trash2, 
   AlertTriangle, 
   Info, 
   AlertCircle, 
   Bug,
   RefreshCw,
-  Calendar,
   User,
   Clock,
   Database,
   Shield,
   Cpu,
   Globe,
-  Eye,
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
@@ -53,8 +49,15 @@ interface LogStats {
   hourlyActivity: Array<{ hour: string; count: number }>
 }
 
+interface PaginationInfo {
+  page: number
+  limit: number
+  total: number
+  pages: number
+}
+
 const SystemLogs: React.FC = () => {
-  const { user, isDarkMode } = useAuth()
+  const { isDarkMode } = useAuth()
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [stats, setStats] = useState<LogStats | null>(null)
   const [loading, setLoading] = useState(false)
@@ -72,7 +75,7 @@ const SystemLogs: React.FC = () => {
   })
   
   // Pagination
-  const [pagination, setPagination] = useState({
+  const [pagination, setPagination] = useState<PaginationInfo>({
     page: 1,
     limit: 50,
     total: 0,
@@ -94,9 +97,9 @@ const SystemLogs: React.FC = () => {
       })
 
       const response = await apiService.get(`/api/logs?${queryParams}`)
-      if (response.success) {
-        setLogs(response.logs)
-        setPagination(prev => ({ ...prev, ...response.pagination }))
+      if (response.success && response.data) {
+        setLogs(response.data.logs || [])
+        setPagination(prev => ({ ...prev, ...(response.data.pagination || {}) }))
       }
     } catch (error) {
       console.error('Error fetching logs:', error)
@@ -108,8 +111,8 @@ const SystemLogs: React.FC = () => {
   const fetchStats = async () => {
     try {
       const response = await apiService.get('/api/logs/stats?hours=24')
-      if (response.success) {
-        setStats(response.stats)
+      if (response.success && response.data) {
+        setStats(response.data.stats || response.data)
       }
     } catch (error) {
       console.error('Error fetching log stats:', error)
@@ -188,7 +191,7 @@ const SystemLogs: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <Sidebar />
+      <Sidebar isDarkMode={isDarkMode} setIsDarkMode={() => {}} />
       
       <div className="ml-64 p-8">
         {/* Header */}
@@ -468,7 +471,7 @@ const SystemLogs: React.FC = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          {formatDuration(log.duration_ms)}
+                          {formatDuration(log.duration_ms || null)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <button

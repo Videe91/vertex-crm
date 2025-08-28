@@ -13,7 +13,7 @@ interface LogEntry {
 class FrontendLogger {
   private static queue: LogEntry[] = []
   private static isOnline = navigator.onLine
-  private static flushInterval: NodeJS.Timeout | null = null
+  private static flushInterval: number | null = null
 
   static init() {
     // Start flush interval
