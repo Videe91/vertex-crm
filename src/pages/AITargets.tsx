@@ -101,7 +101,7 @@ const AITargets: React.FC = () => {
     try {
       const response = await apiService.get(`/api/campaigns/${campaignId}/ai-config`)
       if (response.success) {
-        setCampaignConfig(response.config)
+        setCampaignConfig(response.data?.config)
         generateCampaignSpecificTargets(response.config)
       } else {
         // No AI config found, use default targets

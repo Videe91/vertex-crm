@@ -9,8 +9,7 @@ import {
   Target, 
   Megaphone, 
   TrendingUp,
-  Calendar,
-  X
+
 } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useAuth } from '../contexts/AuthContext'

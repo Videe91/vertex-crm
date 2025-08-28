@@ -269,8 +269,8 @@ const PublicForm: React.FC = () => {
                     <input
                       type="checkbox"
                       id={field.name}
-                      checked={formData[field.name] || false}
-                      onChange={(e) => handleInputChange(field.name, e.target.checked)}
+                      checked={Boolean(formData[field.name])}
+                      onChange={(e) => handleInputChange(field.name, String(e.target.checked))}
                       required={field.required}
                       className="mt-1 w-4 h-4 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
                     />

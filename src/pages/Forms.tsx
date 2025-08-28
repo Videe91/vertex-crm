@@ -200,6 +200,9 @@ const Forms: React.FC = () => {
       name: form.name,
       campaign_id: form.campaign_id.toString(),
       description: form.description,
+      client_form_url: form.client_form_url || '',
+      success_message: form.success_message || 'Thank you for your submission!',
+      redirect_delay: form.redirect_delay || 3,
       fields: [...form.fields]
     })
     setShowEditModal(true)

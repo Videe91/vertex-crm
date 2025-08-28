@@ -1,5 +1,4 @@
 // Frontend Logger - Captures client-side errors and activities
-import { apiService } from '../services/api'
 
 interface LogEntry {
   level: 'info' | 'warn' | 'error' | 'debug'

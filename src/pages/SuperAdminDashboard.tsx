@@ -8,7 +8,6 @@ import {
   Activity,
   ArrowUpRight,
   MoreHorizontal,
-  Search
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import Sidebar from '../components/Sidebar'
