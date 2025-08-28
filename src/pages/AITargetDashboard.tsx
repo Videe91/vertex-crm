@@ -2,17 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { 
   Target, 
   Brain, 
-  TrendingUp, 
   Users, 
   Building2,
-  Zap,
   AlertCircle,
-  CheckCircle,
-  Clock,
-  BarChart3,
-  Settings,
-  Play,
-  ArrowRight,
   ArrowDown
 } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
@@ -72,7 +64,7 @@ interface AgentTarget {
 }
 
 const AITargetDashboard: React.FC = () => {
-  const { user, isDarkMode, setIsDarkMode } = useAuth()
+  const { isDarkMode, setIsDarkMode } = useAuth()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [centers, setCenters] = useState<Center[]>([])
   const [selectedCampaign, setSelectedCampaign] = useState<number | null>(null)
@@ -126,7 +118,7 @@ const AITargetDashboard: React.FC = () => {
     try {
       const response = await apiService.get(`/api/targets/campaign/${campaignId}`)
       if (response.success) {
-        setCampaignTargets(response.targets || [])
+        setCampaignTargets(response.data?.targets || [])
       }
     } catch (error) {
       console.error('Error fetching campaign targets:', error)
@@ -158,7 +150,7 @@ const AITargetDashboard: React.FC = () => {
     try {
       const response = await apiService.get(`/api/targets/center/${centerId}?campaign_id=${campaignId}`)
       if (response.success) {
-        setCenterTargets(response.targets || [])
+        setCenterTargets(response.data?.targets || [])
       }
     } catch (error) {
       console.error('Error fetching center targets:', error)
@@ -172,7 +164,7 @@ const AITargetDashboard: React.FC = () => {
     try {
       const response = await apiService.get(`/api/targets/agents/center/${centerId}?campaign_id=${campaignId}`)
       if (response.success) {
-        setAgentTargets(response.targets || [])
+        setAgentTargets(response.data?.targets || [])
       }
     } catch (error) {
       console.error('Error fetching agent targets:', error)

@@ -28,6 +28,7 @@ export interface LoginResponse {
   success: boolean
   token: string
   user: User
+  firstLogin?: boolean
   error?: string
 }
 

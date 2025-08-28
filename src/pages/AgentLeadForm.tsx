@@ -34,10 +34,10 @@ const AgentLeadForm = () => {
       console.log('Auth completed, user loaded:', user)
       console.log('All user properties:', Object.keys(user))
       console.log('user.center_id:', user.center_id)
-      console.log('user.centerId:', user.centerId)
+      console.log('user.center_id:', user.center_id)
       console.log('user.center:', user.center)
       
-      const centerId = user.center_id || user.centerId || user.center?.id
+      const centerId = user.center_id || user.center?.id
       if (centerId) {
         console.log('Found center ID:', centerId)
         fetchCenterForms()
@@ -66,7 +66,7 @@ const AgentLeadForm = () => {
     if (!authLoading && user && forms.length === 0 && !loading) {
       console.log('Setting up fallback retry...')
       const timer = setTimeout(() => {
-        const centerId = user.center_id || user.centerId || user.center?.id
+        const centerId = user.center_id || user.center?.id
         if (centerId) {
           console.log('Fallback retry executing...')
           fetchCenterForms()
@@ -87,7 +87,7 @@ const AgentLeadForm = () => {
   }, [countdown, redirectUrl])
 
   const fetchCenterForms = async () => {
-    const centerId = user?.center_id || user?.centerId || user?.center?.id
+    const centerId = user?.center_id || user?.center?.id
     if (!centerId) {
       console.log('No center_id found for user in fetchCenterForms')
       setLoading(false)
@@ -158,7 +158,7 @@ const AgentLeadForm = () => {
   }
 
   const handleInputChange = (fieldName: string, value: string | boolean) => {
-    setFormData(prev => ({
+    setFormData((prev: any) => ({
       ...prev,
       [fieldName]: value
     }))
