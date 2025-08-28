@@ -11142,6 +11142,19 @@ app.get('/api/notifications/unread-count', authenticateToken, (req, res) => {
     );
 });
 
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Catch-all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 // Graceful shutdown
 process.on('SIGINT', () => {
     console.log('\nShutting down VERTEX CRM...');
