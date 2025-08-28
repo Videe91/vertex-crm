@@ -507,6 +507,15 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Root health check for Railway
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Vertex CRM Server is running',
+        status: 'healthy',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Secure file upload configuration
 const upload = multer({ 
     dest: 'uploads/',
