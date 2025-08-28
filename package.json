@@ -2,7 +2,7 @@
   "name": "vertex_crm",
   "version": "1.0.0",
   "description": "VERTEX CRM - Lead Management System",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
