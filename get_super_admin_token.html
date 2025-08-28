@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Super Admin Token</title>
+</head>
+<body>
+    <h1>Get Super Admin Token</h1>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="getSuperAdminToken()">Get Super Admin Token</button>
+    <button onclick="testCenterCreation()">Test Center Creation</button>
+    
+    <div id="output" class="output-area"></div>
+    
+    <style>
+        .output-area {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            output.textContent = '';
+            log('All storage cleared');
+        }
+        
+        async function getSuperAdminToken() {
+            log('=== Getting Super Admin Token ===');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'vertex2024'
+                    })
+                });
+                
+                log('Response status: ' + response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('❌ Login failed: ' + errorText);
+                    return;
+                }
+                
+                const data = await response.json();
+                log('✅ Login successful!');
+                log('User role: ' + data.user.role);
+                log('Token: ' + data.token.substring(0, 20) + '...');
+                
+                if (data.success && data.token) {
+                    localStorage.setItem('vertex_token', data.token);
+                    log('✅ Token saved to localStorage');
+                    
+                    // Test the token
+                    const testResponse = await fetch('http://localhost:3000/api/auth/me', {
+                        headers: {
+                            'Authorization': 'Bearer ' + data.token
+                        }
+                    });
+                    
+                    if (testResponse.ok) {
+                        const testData = await testResponse.json();
+                        log('✅ Token test successful - Role: ' + testData.role);
+                    } else {
+                        log('❌ Token test failed');
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function testCenterCreation() {
+            log('=== Testing Center Creation ===');
+            
+            const token = localStorage.getItem('vertex_token');
+            if (!token) {
+                log('❌ No token found - please get token first');
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/centers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        centerName: 'Test Center Debug',
+                        centerCode: 'TC_DEBUG',
+                        country: 'Egypt',
+                        address: 'Test Address',
+                        adminName: 'Test Admin',
+                        campaignId: '',
+                        status: 'active',
+                        admin_username: 'TC_DEBUG_CA_TEST',
+                        admin_password: 'testpass123'
+                    })
+                });
+                
+                log('Center creation response status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Center creation successful!');
+                    log('Response: ' + JSON.stringify(data, null, 2));
+                } else {
+                    const errorText = await response.text();
+                    log('❌ Center creation failed: ' + errorText);
+                }
+                
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

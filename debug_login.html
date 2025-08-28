@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Login</title>
+</head>
+<body>
+    <h1>Debug Center Admin Login</h1>
+    <button onclick="clearStorage()">Clear All Storage</button>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testLogout()">Test Logout</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <button onclick="fullLoginTest()">Full Login/Logout/Login Test</button>
+    
+    <div id="output" class="output-area"></div>
+    
+    <style>
+        .output-area {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            output.textContent = '';
+            log('All storage cleared');
+        }
+        
+        function checkStorage() {
+            log('=== Storage Check ===');
+            log('vertex_token: ' + (localStorage.getItem('vertex_token') ? 'EXISTS' : 'NOT FOUND'));
+            log('theme: ' + localStorage.getItem('theme'));
+            log('All localStorage keys: ' + Object.keys(localStorage).join(', '));
+        }
+        
+        async function testLogin() {
+            log('=== Testing Login ===');
+            
+            try {
+                log('Making POST request to http://localhost:3000/api/auth/login');
+                
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'FI_IN_CA_SATYA',
+                        password: 'Test123'
+                    })
+                });
+                
+                log('Response status: ' + response.status);
+                log('Response ok: ' + response.ok);
+                log('Response headers: ' + JSON.stringify([...response.headers.entries()]));
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('Error response text: ' + errorText);
+                    return;
+                }
+                
+                const data = await response.json();
+                log('Response data: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success && data.token) {
+                    localStorage.setItem('vertex_token', data.token);
+                    log('✅ Token saved to localStorage');
+                    
+                    // Test if we can access a protected endpoint
+                    log('Testing auth with /api/auth/me...');
+                    const meResponse = await fetch('http://localhost:3000/api/auth/me', {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + data.token
+                        }
+                    });
+                    
+                    log('Auth test status: ' + meResponse.status);
+                    if (meResponse.ok) {
+                        const meData = await meResponse.json();
+                        log('✅ Auth test successful: ' + JSON.stringify(meData, null, 2));
+                    } else {
+                        const errorText = await meResponse.text();
+                        log('❌ Auth test failed: ' + errorText);
+                    }
+                } else {
+                    log('❌ Login failed: ' + (data.error || 'Unknown error'));
+                }
+                
+            } catch (error) {
+                log('❌ Network Error: ' + error.message);
+                log('This might be a CORS issue or server not running');
+            }
+        }
+
+        async function testLogout() {
+            log('=== Testing Logout ===');
+            
+            const token = localStorage.getItem('vertex_token');
+            if (!token) {
+                log('❌ No token found - cannot test logout');
+                return;
+            }
+            
+            try {
+                log('Making POST request to logout...');
+                const response = await fetch('http://localhost:3000/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                log('Logout response status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Logout successful: ' + JSON.stringify(data));
+                    localStorage.removeItem('vertex_token');
+                    log('✅ Token removed from localStorage');
+                } else {
+                    const errorText = await response.text();
+                    log('❌ Logout failed: ' + errorText);
+                }
+                
+            } catch (error) {
+                log('❌ Logout error: ' + error.message);
+            }
+        }
+
+        async function fullLoginTest() {
+            log('=== Full Login/Logout/Login Test ===');
+            
+            // Clear everything first
+            localStorage.clear();
+            log('1. Cleared all storage');
+            
+            // First login
+            log('2. Testing first login...');
+            await testLogin();
+            
+            // Wait a bit
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test logout
+            log('3. Testing logout...');
+            await testLogout();
+            
+            // Wait a bit
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test login again
+            log('4. Testing login again...');
+            await testLogin();
+            
+            log('=== Full test complete ===');
+        }
+        
+        // Check storage on load
+        checkStorage();
+    </script>
+</body>
+</html>

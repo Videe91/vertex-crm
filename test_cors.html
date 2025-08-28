@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORS Test</title>
+</head>
+<body>
+    <h1>CORS and Server Test</h1>
+    <button onclick="testCORS()">Test CORS</button>
+    <button onclick="testLogin()">Test Super Admin Login</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    
+    <div id="output" class="output-area"></div>
+    
+    <style>
+        .output-area {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            output.textContent = '';
+            log('Storage cleared');
+        }
+        
+        async function testCORS() {
+            log('=== Testing CORS ===');
+            
+            try {
+                // Test simple GET request first
+                log('Testing simple GET request...');
+                const response = await fetch('http://localhost:3000/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log('Response status: ' + response.status);
+                log('Response headers: ' + JSON.stringify([...response.headers.entries()]));
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    log('✅ CORS test successful: ' + data);
+                } else {
+                    log('❌ CORS test failed with status: ' + response.status);
+                }
+                
+            } catch (error) {
+                log('❌ CORS Error: ' + error.message);
+                log('This indicates CORS is blocking the request');
+            }
+        }
+        
+        async function testLogin() {
+            log('=== Testing Super Admin Login ===');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'vertex2024'
+                    })
+                });
+                
+                log('Login response status: ' + response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Login successful!');
+                    log('User role: ' + data.user.role);
+                    
+                    if (data.token) {
+                        localStorage.setItem('vertex_token', data.token);
+                        log('✅ Token saved to localStorage');
+                    }
+                } else {
+                    const errorData = await response.text();
+                    log('❌ Login failed: ' + errorData);
+                }
+                
+            } catch (error) {
+                log('❌ Login Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
