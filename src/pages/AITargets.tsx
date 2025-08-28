@@ -102,7 +102,7 @@ const AITargets: React.FC = () => {
       const response = await apiService.get(`/api/campaigns/${campaignId}/ai-config`)
       if (response.success) {
         setCampaignConfig(response.data?.config)
-        generateCampaignSpecificTargets(response.config)
+        generateCampaignSpecificTargets(response.data?.config)
       } else {
         // No AI config found, use default targets
         setDefaultTargets()
@@ -244,26 +244,26 @@ const AITargets: React.FC = () => {
       })
       
       if (response.success) {
-        setAiAnalysis(response.analysis)
+        setAiAnalysis(response.data?.analysis)
         
         // Update targets based on AI recommendations
-        if (response.analysis.target_recommendations) {
+        if (response.data?.analysis?.target_recommendations) {
           const aiTargets = [
             { 
               type: 'leads_per_day', 
-              value: response.analysis.target_recommendations.leads_per_day || 10, 
+              value: response.data?.analysis?.target_recommendations?.leads_per_day || 10, 
               period: 'daily',
               reasoning: 'AI-recommended based on campaign performance analysis'
             },
             { 
               type: 'quality_rate', 
-              value: response.analysis.target_recommendations.quality_rate || 85, 
+              value: response.data?.analysis?.target_recommendations?.quality_rate || 85, 
               period: 'daily',
               reasoning: 'AI-optimized quality target for sustainable performance'
             },
             { 
               type: 'conversion_rate', 
-              value: response.analysis.target_recommendations.conversion_rate || 15, 
+              value: response.data?.analysis?.target_recommendations?.conversion_rate || 15, 
               period: 'daily',
               reasoning: 'AI-calculated conversion target based on market conditions'
             }

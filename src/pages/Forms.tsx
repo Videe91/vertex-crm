@@ -35,6 +35,9 @@ interface LeadForm {
   campaign_id: number
   campaign_name: string
   description: string
+  client_form_url?: string
+  success_message?: string
+  redirect_delay?: number
   fields: FormField[]
   status: 'active' | 'draft' | 'archived'
   submissions: number

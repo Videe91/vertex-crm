@@ -80,7 +80,7 @@ const CampaignAIConfig: React.FC = () => {
     try {
       const response = await apiService.get(`/api/campaigns/${campaignId}/ai-config`)
       if (response.success) {
-        setAiConfig(response.config)
+        setAiConfig(response.data?.config)
       } else {
         setAiConfig(null)
         setMessage({ type: 'error', text: 'AI configuration not found for this campaign' })
@@ -139,7 +139,7 @@ const CampaignAIConfig: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <Sidebar />
+      <Sidebar isDarkMode={isDarkMode} setIsDarkMode={() => {}} />
       
       <div className="ml-64 p-8">
         {/* Header */}

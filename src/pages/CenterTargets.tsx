@@ -122,25 +122,25 @@ const CenterTargets: React.FC = () => {
       // Fetch campaign seed targets
       const campaignResponse = await apiService.get(`/api/targets/campaign/${campaignId}`)
       if (campaignResponse.success) {
-        setCampaignTargets(campaignResponse.targets || [])
+        setCampaignTargets(campaignResponse.data?.targets || [])
       }
 
       // Fetch center AI-generated targets
       const centerResponse = await apiService.get(`/api/targets/center/${centerId}?campaign_id=${campaignId}`)
       if (centerResponse.success) {
-        setCenterTargets(centerResponse.targets || [])
+        setCenterTargets(centerResponse.data?.targets || [])
       }
 
       // Fetch agent targets
       const agentResponse = await apiService.get(`/api/targets/agents/center/${centerId}?campaign_id=${campaignId}`)
       if (agentResponse.success) {
-        setAgentTargets(agentResponse.targets || [])
+        setAgentTargets(agentResponse.data?.targets || [])
       }
 
       // Fetch performance data
       const performanceResponse = await apiService.get(`/api/targets/center/${centerId}`)
       if (performanceResponse.success) {
-        setPerformanceData(performanceResponse.performance || null)
+        setPerformanceData(performanceResponse.data?.performance || null)
       }
 
     } catch (error) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, X, ChevronDown } from 'lucide-react'
+import { Bell, X, ChevronDown, Megaphone, Target, TrendingUp, AlertTriangle, Info } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface Notification {
@@ -269,9 +269,7 @@ const NotificationBell: React.FC<NotificationBellProps> = ({ isDarkMode }) => {
         setUnreadCount(prev => Math.max(0, prev - 1))
         
         // Update selected notification if it's the one being marked as read
-        if (null && null.id === notificationId) {
-          () => {}(prev => prev ? { ...prev, is_read: true, read_at: new Date().toISOString() } : null)
-        }
+        // Note: selectedNotification functionality removed
       }
     } catch (error) {
       console.error('Error marking notification as read:', error)
