@@ -1870,9 +1870,9 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                 tokenBlacklist.add(req.token);
             }
 
-            // Update password in users table (remove temp_password for security)
-            db.run(`UPDATE users SET password = ?, temp_password = NULL, first_login = 0 WHERE id = ?`, 
-                [hashedNewPassword, req.user.id], 
+            // Update password in users table (remove temp_password for security, store current_password for center admin visibility)
+            db.run(`UPDATE users SET password = ?, temp_password = NULL, first_login = 0, current_password = ? WHERE id = ?`, 
+                [hashedNewPassword, newPassword, req.user.id], 
                 function(updateErr) {
                     if (updateErr) {
                         console.error('Error updating password:', updateErr);
@@ -1886,7 +1886,6 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                             function(centerErr) {
                                 if (centerErr) {
                                     console.error('Error updating center password:', centerErr);
-                                    // Don't fail the whole operation for this
                                 }
                             }
                         );
@@ -1898,7 +1897,7 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
 
                     res.json({ 
                         success: true, 
-                        message: 'Password changed successfully' 
+                        message: 'Password changed successfully. Please log in again.' 
                     });
                 }
             );
@@ -6963,7 +6962,7 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
         
         const query = `
             SELECT u.id, u.user_id as agent_id, u.username, u.title, u.name, u.alias, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login, u.temp_password, u.campaign_id,
+                   u.role, u.status, u.created_at, u.last_login, u.temp_password, u.first_login, u.current_password, u.campaign_id,
                    u.date_of_birth, c.campaign_name
             FROM users u
             LEFT JOIN campaigns c ON u.campaign_id = c.id
