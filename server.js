@@ -7057,7 +7057,7 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
                    c.campaign_name, c.id as campaign_id
             FROM users u
             LEFT JOIN centers cent ON u.center_id = cent.id
-            LEFT JOIN campaign_center_assignments cca ON cent.id = cca.center_id
+            LEFT JOIN campaign_center_assignments cca ON cent.id = cca.center_id AND cca.status = 'active'
             LEFT JOIN campaigns c ON cca.campaign_id = c.id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
@@ -7068,6 +7068,9 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
         db.all(query, [adminUser.center_id], (err, agents) => {
             if (err) {
                 console.error('Error fetching agents:', err.message);
+                console.error('Full error:', err);
+                console.error('SQL Query:', query);
+                console.error('Query parameters:', [adminUser.center_id]);
                 return res.status(500).json({ success: false, error: 'Failed to fetch agents' });
             }
             
