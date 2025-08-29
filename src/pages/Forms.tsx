@@ -813,67 +813,99 @@ const Forms: React.FC = () => {
                     Form Preview
                   </h4>
                   
-                  <div className={`border rounded-lg p-6 ${
-                    isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'
-                  }`}>
-                    <h3 className={`text-lg font-semibold mb-4 ${
-                      isDarkMode ? 'text-white' : 'text-gray-900'
-                    }`}>
-                      {formData.name || 'Form Name'}
-                    </h3>
-                    
-                    <div className="space-y-4">
-                      {formData.fields.map(field => (
-                        <div key={field.id}>
-                          <label className={`block text-sm font-medium mb-1 ${
-                            isDarkMode ? 'text-gray-300' : 'text-gray-700'
-                          }`}>
-                            {field.label} {field.required && <span className="text-red-500">*</span>}
-                          </label>
-                          {field.type === 'textarea' ? (
-                            <textarea
-                              placeholder={field.placeholder}
-                              rows={3}
-                              disabled
-                              className={`w-full px-3 py-2 rounded border ${
-                                isDarkMode
-                                  ? 'bg-gray-600 border-gray-500 text-gray-300'
-                                  : 'bg-white border-gray-300 text-gray-600'
-                              }`}
-                            />
-                          ) : field.type === 'select' ? (
-                            <select
-                              disabled
-                              title="Preview select field"
-                              className={`w-full px-3 py-2 rounded border ${
-                                isDarkMode
-                                  ? 'bg-gray-600 border-gray-500 text-gray-300'
-                                  : 'bg-white border-gray-300 text-gray-600'
-                              }`}
-                            >
-                              <option>Select an option</option>
-                            </select>
-                          ) : (
-                            <input
-                              type={field.type}
-                              placeholder={field.placeholder}
-                              disabled
-                              className={`w-full px-3 py-2 rounded border ${
-                                isDarkMode
-                                  ? 'bg-gray-600 border-gray-500 text-gray-300'
-                                  : 'bg-white border-gray-300 text-gray-600'
-                              }`}
-                            />
-                          )}
+                  <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-6">
+                    <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-6">
+                      {/* Header */}
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center space-x-3">
+                          <div className="bg-white rounded-lg p-2">
+                            <div className="w-12 h-6 bg-gray-300 rounded flex items-center justify-center text-xs text-gray-600">
+                              LOGO
+                            </div>
+                          </div>
+                          <h3 className="text-lg font-bold text-white">
+                            {formData.name || 'Form Name'}
+                          </h3>
                         </div>
-                      ))}
+                        <div className="bg-slate-700 rounded-lg px-3 py-2 text-center">
+                          <div className="text-xs text-slate-300 font-medium">Transfer Number</div>
+                          <div className="text-sm font-bold text-blue-400">+1-833-539-7305</div>
+                        </div>
+                      </div>
                       
-                      <button
-                        disabled
-                        className="w-full bg-orange-600 text-white py-2 px-4 rounded-lg font-medium opacity-75"
-                      >
-                        Submit
-                      </button>
+                      {/* Form Fields */}
+                      <div className="space-y-4">
+                        {formData.fields.map(field => (
+                          <div key={field.id}>
+                            <label className="block text-sm font-medium text-white mb-2">
+                              {field.label} {field.required && <span className="text-red-400">*</span>}
+                            </label>
+                            {field.type === 'textarea' ? (
+                              <textarea
+                                placeholder={field.placeholder}
+                                rows={3}
+                                disabled
+                                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                              />
+                            ) : field.type === 'select' ? (
+                              <select
+                                disabled
+                                title="Preview select field"
+                                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                              >
+                                <option>Select an option</option>
+                              </select>
+                            ) : (
+                              <input
+                                type={field.type}
+                                placeholder={field.placeholder}
+                                disabled
+                                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                              />
+                            )}
+                          </div>
+                        ))}
+                        
+                        {/* ZIP Code Field */}
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">
+                            Service Area ZIP Code <span className="text-red-400">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Enter 5-digit ZIP code (e.g., 12345)"
+                            disabled
+                            className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400"
+                          />
+                          <p className="text-xs text-slate-400 mt-1">
+                            Enter at least 5 digits to check service availability. This field will be saved for our records only.
+                          </p>
+                        </div>
+                        
+                        {/* Consent Checkbox */}
+                        <div>
+                          <div className="flex items-start space-x-3">
+                            <input
+                              type="checkbox"
+                              disabled
+                              className="mt-1 w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded"
+                            />
+                            <span className="text-sm leading-relaxed text-slate-300">
+                              Before transferring you, I need your consent: By continuing, you agree to Vivint's Electronic 
+                              Disclosure, Terms of Service, and Privacy Policy. You also agree to receive marketing calls, 
+                              texts, and emails from Vivint - though this isn't required for purchase. You can opt-out 
+                              anytime by replying STOP. May I proceed with your transfer? <span className="text-red-400">*</span>
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <button
+                          disabled
+                          className="w-full bg-slate-600 text-white py-4 px-6 rounded-lg font-medium opacity-75"
+                        >
+                          Complete Required Fields
+                        </button>
+                      </div>
                     </div>
                   </div>
 
