@@ -812,6 +812,15 @@ function initializeDatabase() {
             FOREIGN KEY (center_id) REFERENCES centers(id)
         )`);
 
+        // AGENT PASSWORDS TABLE - For center admin visibility of current passwords
+        db.run(`CREATE TABLE IF NOT EXISTS agent_passwords (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            current_password TEXT NOT NULL,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE
+        )`);
+
         // LEADS TABLE - Universal lead storage
         db.run(`CREATE TABLE IF NOT EXISTS leads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1895,8 +1904,8 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                 tokenBlacklist.add(req.token);
             }
 
-            // Update password in users table
-            db.run(`UPDATE users SET password = ? WHERE id = ?`, 
+            // Update password in users table and store current password for center admin visibility
+            db.run(`UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, 
                 [hashedNewPassword, req.user.id], 
                 function(updateErr) {
                     if (updateErr) {
@@ -1911,6 +1920,21 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                             function(centerErr) {
                                 if (centerErr) {
                                     console.error('Error updating center password:', centerErr);
+                                }
+                            }
+                        );
+                    }
+
+                    // For agents, store the new password in a way center admins can see it
+                    // We'll create a simple password tracking table for this purpose
+                    if (user.role === 'agent' || user.role === 'team_leader' || user.role === 'manager' || user.role === 'sme') {
+                        // Create or update password tracking for center admin visibility
+                        db.run(`INSERT OR REPLACE INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+                            [user.id, newPassword],
+                            function(trackErr) {
+                                if (trackErr) {
+                                    console.error('Error tracking agent password:', trackErr.message);
+                                    // Don't fail the password change if tracking fails
                                 }
                             }
                         );
@@ -7051,11 +7075,12 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
             return res.status(500).json({ success: false, error: 'Failed to get center information' });
         }
         
-        // First, let's get agents without JOINs to avoid potential issues
+        // Get agents with current password for center admin visibility
         const query = `
             SELECT u.id, u.user_id as agent_id, u.username, u.name, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login
+                   u.role, u.status, u.created_at, u.last_login, ap.current_password
             FROM users u
+            LEFT JOIN agent_passwords ap ON u.id = ap.agent_id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
             AND u.status != 'deleted'
@@ -7079,12 +7104,13 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
                 WHERE cca.center_id = ? AND cca.status = 'active'
                 LIMIT 1
             `, [adminUser.center_id], (campaignErr, campaign) => {
-                // Add campaign and temp_password fields to agents
+                // Add campaign and password fields to agents
                 const agentsWithData = agents.map(agent => ({
                     ...agent,
                     campaign_name: campaign ? campaign.campaign_name : null,
                     campaign_id: campaign ? campaign.campaign_id : null,
-                    temp_password: null // For security, passwords are not stored in plain text
+                    temp_password: agent.current_password, // Use current_password from agent_passwords table
+                    current_password: agent.current_password // Current password visible to center admin
                 }));
                 
                 res.json({ success: true, agents: agentsWithData });
@@ -7164,10 +7190,23 @@ app.post('/api/center-admin/agents', authenticateToken, checkRole(['center_admin
                 return res.status(500).json({ success: false, error: 'Failed to create agent' });
             }
             
+            const newAgentId = this.lastID;
+            
+            // Store the temporary password for center admin visibility
+            db.run(`INSERT INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+                [newAgentId, temp_password],
+                function(trackErr) {
+                    if (trackErr) {
+                        console.error('Error tracking new agent password:', trackErr.message);
+                        // Don't fail the creation if tracking fails
+                    }
+                }
+            );
+            
             res.json({ 
                 success: true, 
                 agent: {
-                    id: this.lastID,
+                    id: newAgentId,
                     agent_id,
                     title,
                     name,
@@ -7486,6 +7525,17 @@ app.put('/api/center-admin/agents/:id/reset-password', authenticateToken, checkR
             if (this.changes === 0) {
                 return res.status(404).json({ success: false, error: 'Agent not found or access denied' });
             }
+            
+            // Store the new password for center admin visibility
+            db.run(`INSERT OR REPLACE INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+                [agentId, temp_password],
+                function(trackErr) {
+                    if (trackErr) {
+                        console.error('Error tracking reset password:', trackErr.message);
+                        // Don't fail the reset if tracking fails
+                    }
+                }
+            );
             
             res.json({ 
                 success: true, 
