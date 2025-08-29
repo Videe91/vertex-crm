@@ -19,8 +19,6 @@ import {
 import Sidebar from '../components/Sidebar'
 import { useAuth } from '../contexts/AuthContext'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
-
 const Centers: React.FC = () => {
   const { isDarkMode, setIsDarkMode } = useAuth()
   const [showAddCenterModal, setShowAddCenterModal] = useState(false)
@@ -121,7 +119,7 @@ const Centers: React.FC = () => {
   // Fetch campaigns for a specific center
   const fetchCenterCampaigns = async (centerId: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/centers/${centerId}/campaigns`, {
+      const response = await fetch(`/api/centers/${centerId}/campaigns`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
         }
@@ -150,7 +148,7 @@ const Centers: React.FC = () => {
   // Handle campaign assignment to center
   const handleAssignCampaign = async (centerId: number, campaignId: number, commission: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/campaign-assignments`, {
+      const response = await fetch(`/api/campaign-assignments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,7 +179,7 @@ const Centers: React.FC = () => {
   // Handle campaign commission update
   const handleUpdateCampaignCommission = async (centerId: number, campaignId: number, commission: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/campaign-assignments/${campaignId}/${centerId}/commission`, {
+      const response = await fetch(`/api/campaign-assignments/${campaignId}/${centerId}/commission`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -222,7 +220,7 @@ const Centers: React.FC = () => {
   // Remove campaign from center
   const handleRemoveCampaignFromCenter = async (centerId: number, campaignId: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/campaign-assignments/${campaignId}/${centerId}`, {
+      const response = await fetch(`/api/campaign-assignments/${campaignId}/${centerId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
@@ -231,7 +229,7 @@ const Centers: React.FC = () => {
 
       if (response.ok) {
         // Refresh campaigns for edit modal
-        const campaignsResponse = await fetch(`${API_BASE_URL}/centers/${centerId}/campaigns`, {
+        const campaignsResponse = await fetch(`/api/centers/${centerId}/campaigns`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
           }
@@ -265,7 +263,7 @@ const Centers: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/centers/${center.id}/commission`, {
+      const response = await fetch(`/api/centers/${center.id}/commission`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -395,7 +393,7 @@ const Centers: React.FC = () => {
     
     try {
       // Update password in database
-      const response = await fetch(`${API_BASE_URL}/centers/${centerId}/reset-password`, {
+      const response = await fetch(`/api/centers/${centerId}/reset-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -532,7 +530,7 @@ const Centers: React.FC = () => {
     setAdminFormError('')
 
     try {
-      const response = await fetch(`${API_BASE_URL}/centers/${showAdminModal.id}/admin`, {
+      const response = await fetch(`/api/centers/${showAdminModal.id}/admin`, {
         method: showAdminModal.admin_username ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -599,7 +597,7 @@ const Centers: React.FC = () => {
   const fetchCenters = async () => {
     try {
       setIsLoadingCenters(true)
-      const response = await fetch(`${API_BASE_URL}/centers`, {
+      const response = await fetch('/api/centers', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
         }
@@ -630,7 +628,7 @@ const Centers: React.FC = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/campaigns`, {
+      const response = await fetch('/api/campaigns', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
         }
@@ -759,7 +757,7 @@ const Centers: React.FC = () => {
         admin_password: adminCredentials.password || (editingCenter?.admin_password || '')
       }
       
-      const url = editingCenter ? `${API_BASE_URL}/centers/${editingCenter.id}` : `${API_BASE_URL}/centers`
+      const url = editingCenter ? `/api/centers/${editingCenter.id}` : `/api/centers`
       const method = editingCenter ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
@@ -829,7 +827,7 @@ const Centers: React.FC = () => {
     
     // Fetch assigned campaigns for this center
     try {
-      const response = await fetch(`${API_BASE_URL}/centers/${center.id}/campaigns`, {
+      const response = await fetch(`/api/centers/${center.id}/campaigns`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
         }
@@ -850,7 +848,7 @@ const Centers: React.FC = () => {
   const handleDeleteCenter = async (centerId: number) => {
     setIsDeleting(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/centers/${centerId}`, {
+      const response = await fetch(`/api/centers/${centerId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
@@ -1413,7 +1411,7 @@ const Centers: React.FC = () => {
                                       0.00 // Default commission, will be set in dropdown
                                     )
                                     // Refresh campaigns
-                                    const response = await fetch(`${API_BASE_URL}/centers/${editingCenter.id}/campaigns`, {
+                                    const response = await fetch(`/api/centers/${editingCenter.id}/campaigns`, {
                                       headers: {
                                         'Authorization': `Bearer ${localStorage.getItem('vertex_token')}`
                                       }
