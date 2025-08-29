@@ -2845,7 +2845,8 @@ async function validatePhoneComplete(phone, agentId, centerId) {
             try {
                 const tcpaAuth = Buffer.from(`${tcpaUsername}:${tcpaPassword}`).toString('base64');
                 // Use the exact format from the PHP example
-                const types = ["tcpa", "dnc"];
+                // Available types: all, tcpa, dnc_complainers, dnc_state, dnc_fed
+                const types = ["tcpa", "dnc_complainers", "dnc_state", "dnc_fed"];
                 const tcpaFormData = new URLSearchParams();
                 tcpaFormData.append('type', JSON.stringify(types));
                 tcpaFormData.append('phone_number', cleanPhone);
@@ -2887,8 +2888,10 @@ async function validatePhoneComplete(phone, agentId, centerId) {
                     validationLog.tcpa_status = 'error';
                 }
                 
-                validationLog.tcpa_federal_dnc = tcpaData.results?.status_array?.includes('dnc_complainers') || false;
-                validationLog.tcpa_state_dnc = JSON.stringify(tcpaData.results?.status_array || []);
+                // Parse actual DNC status from API response
+                const statusArray = tcpaData.results?.status_array || [];
+                validationLog.tcpa_federal_dnc = statusArray.includes('dnc_fed') || statusArray.includes('federal_dnc') || false;
+                validationLog.tcpa_state_dnc = statusArray.includes('dnc_state') || statusArray.includes('state_dnc') ? 'Yes' : 'No';
                 validationLog.tcpa_raw_response = JSON.stringify(tcpaData);
                 
                 // If not clean (clean=0 means not clean, clean=1 means clean)
