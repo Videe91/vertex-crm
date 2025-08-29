@@ -4930,7 +4930,7 @@ app.get('/api/sales-logs/summary', authenticateToken, checkRole(['super_admin', 
 // Get all forms (Super Admin, Center Admin, Agent)
 app.get('/api/forms', authenticateToken, checkRole(['super_admin', 'center_admin', 'agent']), (req, res) => {
     let query = `
-        SELECT lf.*, c.name as campaign_name, c.photo_url as campaign_photo,
+        SELECT lf.*, c.campaign_name, c.photo_url as campaign_photo,
                c.transfer_number, c.department_transfer_number, c.transfer_to_department,
                COUNT(ls.id) as total_submissions,
                COUNT(CASE WHEN ls.validation_status = 'clean' THEN 1 END) as clean_submissions
@@ -5018,7 +5018,7 @@ app.get('/api/forms/public/:slug', (req, res) => {
     const { center } = req.query;
     
     const query = `
-        SELECT lf.*, c.name as campaign_name, c.photo_url as campaign_photo
+        SELECT lf.*, c.campaign_name, c.photo_url as campaign_photo
         FROM lead_forms lf
         LEFT JOIN campaigns c ON lf.campaign_id = c.id
         WHERE lf.slug = ? AND lf.status = 'active'
@@ -5081,7 +5081,7 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
         // Get form and center info
         const form = await new Promise((resolve, reject) => {
             const query = `
-                SELECT lf.*, c.name as campaign_name
+                SELECT lf.*, c.campaign_name
                 FROM lead_forms lf
                 LEFT JOIN campaigns c ON lf.campaign_id = c.id
                 WHERE lf.slug = ? AND lf.status = 'active'
@@ -9177,7 +9177,7 @@ app.get('/api/targets/center/:centerId', authenticateToken, checkRole(['super_ad
         // Get center targets
         const targets = await new Promise((resolve, reject) => {
             db.all(`
-                SELECT ct.*, c.name as center_name, camp.campaign_name
+                SELECT ct.*, c.center_name, camp.campaign_name
                 FROM center_targets ct
                 JOIN centers c ON ct.center_id = c.id
                 JOIN campaigns camp ON ct.campaign_id = camp.id
