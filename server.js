@@ -2851,6 +2851,12 @@ async function validatePhoneComplete(phone, agentId, centerId) {
                 tcpaFormData.append('phone_number', cleanPhone);
                 tcpaFormData.append('contact_name', 'John');
                 
+                console.log('TCPA Request Debug:');
+                console.log('- Username:', tcpaUsername);
+                console.log('- Password length:', tcpaPassword.length);
+                console.log('- Auth header:', `Basic ${tcpaAuth}`);
+                console.log('- Form data:', tcpaFormData.toString());
+                
                 const tcpaResponse = await fetch('https://api.tcpalitigatorlist.com/scrub/phone/', {
                     method: 'POST',
                     headers: {
