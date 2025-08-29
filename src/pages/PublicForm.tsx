@@ -212,11 +212,13 @@ const PublicForm: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-6">
             {form.campaign_photo && (
-              <img 
-                src={form.campaign_photo} 
-                alt={form.campaign_name}
-                className="w-16 h-16 mx-auto mb-4 rounded-lg object-cover"
-              />
+              <div className="flex justify-center mb-4">
+                <img 
+                  src={form.campaign_photo} 
+                  alt={form.campaign_name}
+                  className="max-w-32 max-h-16 mx-auto object-contain"
+                />
+              </div>
             )}
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               {form.name}
