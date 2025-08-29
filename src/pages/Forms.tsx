@@ -239,12 +239,20 @@ const Forms: React.FC = () => {
 
   const handleDeleteForm = async (formId: number) => {
     try {
-      // API call will be implemented here
-      console.log('Deleting form:', formId)
-      setShowDeleteConfirm(null)
-      fetchForms() // Refresh the list
+      const response = await apiService.delete(`forms/${formId}`)
+      if (response.success) {
+        console.log('Form deleted successfully:', response.message)
+        setShowDeleteConfirm(null)
+        fetchForms() // Refresh the list
+        // Show success message (can be implemented with toast)
+        alert(response.message || 'Form deleted successfully')
+      } else {
+        console.error('Error deleting form:', response.error)
+        alert('Failed to delete form: ' + (response.error || 'Unknown error'))
+      }
     } catch (error) {
       console.error('Error deleting form:', error)
+      alert('Failed to delete form. Please try again.')
     }
   }
 

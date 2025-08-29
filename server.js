@@ -5043,6 +5043,41 @@ app.post('/api/forms', authenticateToken, checkRole(['super_admin']), (req, res)
     });
 });
 
+// Delete form (Super Admin)
+app.delete('/api/forms/:id', authenticateToken, checkRole(['super_admin']), (req, res) => {
+    const formId = parseInt(req.params.id);
+    
+    if (!formId) {
+        return res.status(400).json({ success: false, error: 'Invalid form ID' });
+    }
+    
+    // First check if form exists
+    db.get('SELECT id, name FROM lead_forms WHERE id = ?', [formId], (err, form) => {
+        if (err) {
+            console.error('Error checking form existence:', err);
+            return res.status(500).json({ success: false, error: 'Database error' });
+        }
+        
+        if (!form) {
+            return res.status(404).json({ success: false, error: 'Form not found' });
+        }
+        
+        // Delete the form (CASCADE will handle related submissions)
+        db.run('DELETE FROM lead_forms WHERE id = ?', [formId], function(deleteErr) {
+            if (deleteErr) {
+                console.error('Error deleting form:', deleteErr);
+                return res.status(500).json({ success: false, error: 'Failed to delete form' });
+            }
+            
+            console.log(`Form "${form.name}" (ID: ${formId}) deleted successfully by user ${req.user.id}`);
+            res.json({ 
+                success: true, 
+                message: `Form "${form.name}" deleted successfully` 
+            });
+        });
+    });
+});
+
 // Get form by slug (Public - for form rendering)
 app.get('/api/forms/public/:slug', (req, res) => {
     const { slug } = req.params;
