@@ -5992,8 +5992,8 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
                         cca.center_commission,
                         cca.assigned_date,
                         cca.status as assignment_status,
-                        cent.name as center_name,
-                        cent.code as center_code
+                        cent.center_name,
+                        cent.center_code
                     FROM campaign_center_assignments cca
                     JOIN centers cent ON cca.center_id = cent.id
                     WHERE cca.campaign_id = ? AND cca.status = 'active'
