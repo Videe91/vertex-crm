@@ -4983,32 +4983,63 @@ app.post('/api/forms', authenticateToken, checkRole(['super_admin']), (req, res)
         return res.status(400).json({ success: false, error: 'Name, campaign, and form fields are required' });
     }
     
-    // Generate slug from name
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    // Generate unique slug from name
+    const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
-    const query = `
-        INSERT INTO lead_forms (name, slug, campaign_id, description, form_fields, client_form_url, 
-                               field_mapping, success_message, redirect_delay, created_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    // Function to generate unique slug
+    const generateUniqueSlug = (baseSlug, callback) => {
+        let slug = baseSlug;
+        let counter = 0;
+        
+        const checkSlug = () => {
+            db.get('SELECT id FROM lead_forms WHERE slug = ?', [slug], (err, existing) => {
+                if (err) {
+                    return callback(err, null);
+                }
+                
+                if (!existing) {
+                    // Slug is unique
+                    return callback(null, slug);
+                }
+                
+                // Slug exists, try with counter
+                counter++;
+                slug = `${baseSlug}-${counter}`;
+                checkSlug();
+            });
+        };
+        
+        checkSlug();
+    };
     
-    db.run(query, [
-        name, slug, campaign_id, description, 
-        JSON.stringify(form_fields), client_form_url, 
-        JSON.stringify(field_mapping || {}), 
-        success_message || 'Thank you for your interest!', 
-        redirect_delay || 3, 
-        req.user.id
-    ], function(err) {
-        if (err) {
-            console.error('Error creating form:', err);
-            if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-                return res.status(400).json({ success: false, error: 'Form with this name already exists' });
-            }
-            return res.status(500).json({ success: false, error: 'Failed to create form' });
+    // Generate unique slug and create form
+    generateUniqueSlug(baseSlug, (slugErr, uniqueSlug) => {
+        if (slugErr) {
+            console.error('Error generating unique slug:', slugErr);
+            return res.status(500).json({ success: false, error: 'Failed to generate form slug' });
         }
         
-        res.json({ success: true, data: { id: this.lastID, slug } });
+        const query = `
+            INSERT INTO lead_forms (name, slug, campaign_id, description, form_fields, client_form_url, 
+                                   field_mapping, success_message, redirect_delay, created_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        db.run(query, [
+            name, uniqueSlug, campaign_id, description, 
+            JSON.stringify(form_fields), client_form_url, 
+            JSON.stringify(field_mapping || {}), 
+            success_message || 'Thank you for your interest!', 
+            redirect_delay || 3, 
+            req.user.id
+        ], function(err) {
+            if (err) {
+                console.error('Error creating form:', err);
+                return res.status(500).json({ success: false, error: 'Failed to create form' });
+            }
+            
+            res.json({ success: true, data: { id: this.lastID, slug: uniqueSlug } });
+        });
     });
 });
 
