@@ -2853,7 +2853,7 @@ async function validatePhoneComplete(phone, agentId, centerId) {
                 tcpaFormData.append('phone_number', cleanPhone);
                 tcpaFormData.append('contact_name', 'John');
                 
-                const tcpaResponse = await fetch('https://api.tcpalitigatorlist.com/scrub/phone/', {
+                const tcpaResponse = await fetch('https://api.tcpalitigatorlist.com/scrub/phones/', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Basic ${tcpaAuth}`,
