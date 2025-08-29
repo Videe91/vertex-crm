@@ -57,7 +57,7 @@ const Clients: React.FC = () => {
 
       if (response.ok) {
         const clientsData = await response.json()
-        setClients(clientsData)
+        setClients(clientsData.data || [])
       } else {
         console.error('Failed to fetch clients')
       }
