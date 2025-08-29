@@ -7053,8 +7053,12 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
         
         const query = `
             SELECT u.id, u.user_id as agent_id, u.username, u.name, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login
+                   u.role, u.status, u.created_at, u.last_login,
+                   c.campaign_name, c.id as campaign_id
             FROM users u
+            LEFT JOIN centers cent ON u.center_id = cent.id
+            LEFT JOIN campaign_center_assignments cca ON cent.id = cca.center_id
+            LEFT JOIN campaigns c ON cca.campaign_id = c.id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
             AND u.status != 'deleted'
@@ -7067,7 +7071,13 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
                 return res.status(500).json({ success: false, error: 'Failed to fetch agents' });
             }
             
-            res.json({ success: true, agents: agents || [] });
+            // Add temp_password field (null for security, can be populated via reset)
+            const agentsWithPassword = agents.map(agent => ({
+                ...agent,
+                temp_password: null // For security, passwords are not stored in plain text
+            }));
+            
+            res.json({ success: true, agents: agentsWithPassword });
         });
     });
 });
@@ -7466,7 +7476,11 @@ app.put('/api/center-admin/agents/:id/reset-password', authenticateToken, checkR
                 return res.status(404).json({ success: false, error: 'Agent not found or access denied' });
             }
             
-            res.json({ success: true, message: 'Password reset successfully' });
+            res.json({ 
+                success: true, 
+                message: 'Password reset successfully',
+                temp_password: temp_password // Return the new temporary password
+            });
         });
     } catch (error) {
         console.error('Error resetting password:', error);

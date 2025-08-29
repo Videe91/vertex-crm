@@ -313,8 +313,19 @@ const CenterAgents: React.FC = () => {
       })
       
       if (response.ok) {
-        alert(`Password reset for ${agent.name}\n\nNew Temporary Password: ${newPassword}\n\nPlease share this with the agent.`)
-        fetchAgents()
+        const data = await response.json()
+        const actualPassword = data.temp_password || newPassword
+        
+        // Update the agent in local state with the new temp password
+        setAgents(prevAgents => 
+          prevAgents.map(a => 
+            a.id === agent.id 
+              ? { ...a, temp_password: actualPassword }
+              : a
+          )
+        )
+        
+        alert(`Password reset for ${agent.name}\n\nNew Temporary Password: ${actualPassword}\n\nPlease share this with the agent.`)
       }
     } catch (error) {
       console.error('Error resetting password:', error)
