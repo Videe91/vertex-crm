@@ -2663,7 +2663,7 @@ app.post('/api/users', authenticateToken, async (req, res) => {
 app.get('/api/users', authenticateToken, (req, res) => {
     let query = `SELECT u.id, u.user_id, u.username, u.name, u.email, u.phone, 
                         u.role, u.center_id, u.status, u.last_login, u.created_at,
-                        c.name as center_name
+                        c.center_name
                  FROM users u
                  LEFT JOIN centers c ON u.center_id = c.id
                  WHERE 1=1`;
@@ -3346,7 +3346,7 @@ app.get('/api/leads', authenticateToken, (req, res) => {
     let query = `SELECT l.*, 
                         u.name as agent_name, 
                         u.user_id as agent_code,
-                        c.name as center_name,
+                        c.center_name,
                         camp.name as campaign_name
                  FROM leads l
                  JOIN users u ON l.agent_id = u.id
@@ -3445,7 +3445,7 @@ app.post('/api/validate/email', authenticateToken, (req, res) => {
 
 // Get suppression list
 app.get('/api/suppression', authenticateToken, checkRole(['super_admin', 'center_admin']), (req, res) => {
-    let query = `SELECT s.*, c.name as center_name, u.name as added_by_name
+    let query = `SELECT s.*, c.center_name, u.name as added_by_name
                  FROM suppression_list s
                  LEFT JOIN centers c ON s.center_id = c.id
                  LEFT JOIN users u ON s.added_by = u.id
@@ -3556,7 +3556,7 @@ app.get('/api/validation-failures', authenticateToken, checkRole(['super_admin',
             u.first_name as agent_first_name,
             u.last_name as agent_last_name,
             u.username as agent_username,
-            c.name as center_name,
+            c.center_name,
             c.code as center_code,
             camp.campaign_name
         FROM validation_failures vf
@@ -3592,7 +3592,7 @@ app.get('/api/validation-failures', authenticateToken, checkRole(['super_admin',
 
 // Get validation logs
 app.get('/api/validation-logs', authenticateToken, checkRole(['super_admin', 'center_admin']), (req, res) => {
-    let query = `SELECT vl.*, u.name as agent_name, c.name as center_name
+    let query = `SELECT vl.*, u.name as agent_name, c.center_name
                  FROM validation_logs vl
                  LEFT JOIN users u ON vl.agent_id = u.id
                  LEFT JOIN centers c ON vl.center_id = c.id
@@ -3640,7 +3640,7 @@ app.get('/api/validation-logs', authenticateToken, checkRole(['super_admin', 'ce
 app.get('/api/scrubs/usage', authenticateToken, checkRole(['super_admin']), (req, res) => {
     const { month } = req.query; // Format: '2024-01'
     
-    let query = `SELECT c.name as center_name,
+    let query = `SELECT c.center_name,
                         SUM(su.blacklist_scrubs) as total_blacklist,
                         SUM(su.tcpa_scrubs) as total_tcpa,
                         SUM(su.dnc_scrubs) as total_dnc,
@@ -3870,7 +3870,7 @@ async function matchLeadToAgent(customerData, campaignId) {
     
     // Try matching by phone first
     let lead = await new Promise((resolve, reject) => {
-        db.get(`SELECT l.*, u.name as agent_name, c.name as center_name
+        db.get(`SELECT l.*, u.name as agent_name, c.center_name
                 FROM leads l
                 JOIN users u ON l.agent_id = u.id
                 JOIN centers c ON l.center_id = c.id
@@ -3901,7 +3901,7 @@ async function matchLeadToAgent(customerData, campaignId) {
     // Try matching by email if provided
     if (customerData.email) {
         lead = await new Promise((resolve, reject) => {
-            db.get(`SELECT l.*, u.name as agent_name, c.name as center_name
+            db.get(`SELECT l.*, u.name as agent_name, c.center_name
                     FROM leads l
                     JOIN users u ON l.agent_id = u.id
                     JOIN centers c ON l.center_id = c.id
@@ -3964,7 +3964,7 @@ app.get('/api/installations', authenticateToken, (req, res) => {
                         l.customer_name as lead_name,
                         u.name as agent_name, 
                         u.user_id as agent_code,
-                        c.name as center_name,
+                        c.center_name,
                         camp.name as campaign_name
                  FROM installations i
                  LEFT JOIN leads l ON i.lead_id = l.id
@@ -4218,7 +4218,7 @@ app.get('/api/analytics/campaign/:campaignId', authenticateToken, checkRole(['su
         db.all(`SELECT 
                     u.name,
                     u.user_id,
-                    c.name as center_name,
+                    c.center_name,
                     COUNT(DISTINCT i.id) as installations,
                     SUM(i.monthly_value) as monthly_value
                 FROM users u
@@ -4620,7 +4620,7 @@ app.get('/api/sales-logs', authenticateToken, checkRole(['super_admin', 'center_
             ls.created_at,
             ls.center_code,
             ls.agent_id,
-            c.name as center_name,
+            c.center_name,
             lf.name as form_name,
             camp.campaign_name,
             camp.client_rate,
@@ -6032,7 +6032,7 @@ app.get('/api/phone/pre-verification-logs', authenticateToken, checkRole(['super
     const query = `
         SELECT 
             pv.*,
-            c.name as center_name,
+            c.center_name,
             c.code as center_code,
             u.first_name as agent_first_name,
             u.last_name as agent_last_name,
@@ -9734,7 +9734,7 @@ app.get('/api/targets/centers/:campaignId', authenticateToken, checkRole(['super
     try {
         const targets = await new Promise((resolve, reject) => {
             db.all(`
-                SELECT ct.*, c.name as center_name,
+                SELECT ct.*, c.center_name,
                        (SELECT COUNT(*) FROM users WHERE center_id = ct.center_id AND role = 'agent' AND status = 'active') as agent_count
                 FROM center_targets ct
                 JOIN centers c ON ct.center_id = c.id
@@ -10140,7 +10140,7 @@ app.get('/api/targets/center/:centerId', authenticateToken, checkRole(['super_ad
     try {
         const targets = await new Promise((resolve, reject) => {
             db.all(`
-                SELECT ct.*, c.name as center_name,
+                SELECT ct.*, c.center_name,
                        (SELECT COUNT(*) FROM users WHERE center_id = ct.center_id AND role = 'agent' AND status = 'active') as agent_count
                 FROM center_targets ct
                 JOIN centers c ON ct.center_id = c.id
@@ -10976,7 +10976,7 @@ async function collectPerformanceData(entityType, entityId, days = 30, campaignI
                     COUNT(CASE WHEN ls.validation_status = 'clean' THEN 1 END) as clean_leads,
                     COUNT(CASE WHEN ls.sales_status = 'installed' THEN 1 END) as sales_closed,
                     AVG(CASE WHEN ls.validation_status = 'clean' THEN 1.0 ELSE 0.0 END) * 100 as success_rate,
-                    c.name as center_name, c.center_code
+                    c.center_name, c.center_code
                 FROM centers c
                 LEFT JOIN lead_submissions ls ON c.id = ls.center_id 
                     AND DATE(ls.created_at) >= DATE('now', '-${days} days')
