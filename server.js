@@ -2845,15 +2845,13 @@ async function validatePhoneComplete(phone, agentId, centerId) {
             try {
                 const tcpaAuth = Buffer.from(`${tcpaUsername}:${tcpaPassword}`).toString('base64');
                 // Use the exact format from the PHP example
+                const types = ["tcpa", "dnc"];
                 const tcpaFormData = new URLSearchParams();
-                tcpaFormData.append('type[]', 'tcpa');
-                tcpaFormData.append('type[]', 'dnc_state');
-                tcpaFormData.append('type[]', 'dnc_fed');
-                tcpaFormData.append('type[]', 'dnc_complainers');
+                tcpaFormData.append('type', JSON.stringify(types));
                 tcpaFormData.append('phone_number', cleanPhone);
                 tcpaFormData.append('contact_name', 'John');
                 
-                const tcpaResponse = await fetch('https://api.tcpalitigatorlist.com/scrub/phones/', {
+                const tcpaResponse = await fetch('https://api.tcpalitigatorlist.com/scrub/phone/', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Basic ${tcpaAuth}`,
