@@ -2822,9 +2822,11 @@ async function validatePhoneComplete(phone, agentId, centerId) {
         }
         
         // 4. Check TCPA (DNC + Litigators)
-        if (process.env.TCPA_USERNAME && process.env.TCPA_PASSWORD) {
+        const tcpaUsername = 'tcpa_9TiLbuIyUy';
+        const tcpaPassword = 'FeR7·Evdf·ALsx·9QDX·Bco2·s5C7';
+        if (tcpaUsername && tcpaPassword) {
             try {
-                const tcpaAuth = Buffer.from(`${process.env.TCPA_USERNAME}:${process.env.TCPA_PASSWORD}`).toString('base64');
+                const tcpaAuth = Buffer.from(`${tcpaUsername}:${tcpaPassword}`).toString('base64');
                 // Use the exact format from the PHP example
                 const tcpaFormData = new URLSearchParams();
                 tcpaFormData.append('type[]', 'tcpa');
