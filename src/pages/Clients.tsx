@@ -57,9 +57,13 @@ const Clients: React.FC = () => {
 
       if (response.ok) {
         const clientsData = await response.json()
+        console.log('Clients API response:', clientsData)
+        console.log('Clients data type:', typeof clientsData)
+        console.log('Clients data.data type:', typeof clientsData.data)
+        console.log('Is clientsData.data an array?', Array.isArray(clientsData.data))
         setClients(clientsData.data || [])
       } else {
-        console.error('Failed to fetch clients')
+        console.error('Failed to fetch clients', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Error fetching clients:', error)
@@ -409,7 +413,7 @@ const Clients: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {clients.map((client, index) => (
+                    {Array.isArray(clients) ? clients.map((client, index) => (
                       <tr key={client.id} className={`border-b transition-colors duration-200 hover:bg-opacity-50 ${
                         isDarkMode 
                           ? 'border-gray-700/30 hover:bg-gray-800/30' 
@@ -516,7 +520,15 @@ const Clients: React.FC = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center">
+                          <div className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {isLoadingClients ? 'Loading clients...' : 'No clients found'}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
