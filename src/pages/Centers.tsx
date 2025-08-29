@@ -14,7 +14,8 @@ import {
   Eye,
   EyeOff,
   DollarSign,
-  PoundSterling
+  PoundSterling,
+  Copy
 } from 'lucide-react'
 import Sidebar from '../components/Sidebar'
 import { useAuth } from '../contexts/AuthContext'
@@ -457,6 +458,26 @@ const Centers: React.FC = () => {
       const newValue = !currentValue
       return { ...prev, [centerId]: newValue }
     })
+  }
+
+  // Copy password to clipboard
+  const copyPasswordToClipboard = async (centerId: number, center: any) => {
+    const password = getCenterPassword(centerId, center)
+    try {
+      await navigator.clipboard.writeText(password)
+      // Show temporary success message
+      alert('Password copied to clipboard!')
+    } catch (err) {
+      console.error('Failed to copy password:', err)
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = password
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      alert('Password copied to clipboard!')
+    }
   }
 
   // Handle admin creation/editing
@@ -2038,6 +2059,21 @@ const Centers: React.FC = () => {
                                 ) : (
                                   <Eye className="w-4 h-4" />
                                 )}
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  e.preventDefault()
+                                  copyPasswordToClipboard(currentCenter.id, currentCenter)
+                                }}
+                                className={`p-2 rounded transition-colors ${
+                                  isDarkMode
+                                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                    : 'bg-green-50 text-green-600 hover:bg-green-100'
+                                }`}
+                                title="Copy password to clipboard"
+                              >
+                                <Copy className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={(e) => {
