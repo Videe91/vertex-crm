@@ -887,15 +887,20 @@ const Forms: React.FC = () => {
                           <div className="flex items-start space-x-3">
                             <input
                               type="checkbox"
+                              id="consent-preview"
                               disabled
                               className="mt-1 w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded"
+                              aria-label="Consent checkbox for marketing communications"
                             />
-                            <span className="text-sm leading-relaxed text-slate-300">
+                            <label 
+                              htmlFor="consent-preview"
+                              className="text-sm leading-relaxed text-slate-300 cursor-pointer"
+                            >
                               Before transferring you, I need your consent: By continuing, you agree to Vivint's Electronic 
                               Disclosure, Terms of Service, and Privacy Policy. You also agree to receive marketing calls, 
                               texts, and emails from Vivint - though this isn't required for purchase. You can opt-out 
                               anytime by replying STOP. May I proceed with your transfer? <span className="text-red-400">*</span>
-                            </span>
+                            </label>
                           </div>
                         </div>
                         
