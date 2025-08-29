@@ -257,13 +257,27 @@ const CenterAgents: React.FC = () => {
       })
       
       if (response.ok) {
+        const data = await response.json()
         const selectedCampaign = campaigns.find(c => c.campaign_id === parseInt(formData.campaign_id))
         const campaignInfo = selectedCampaign ? `\nAssigned Campaign: ${selectedCampaign.campaign_name}` : ''
+        
+        // Add the new agent to the local state with temp_password
+        const newAgent = {
+          ...data.agent,
+          campaign_name: selectedCampaign?.campaign_name || null,
+          campaign_id: selectedCampaign?.campaign_id || null,
+          temp_password: tempPassword, // Keep the temp password in local state
+          status: 'active',
+          created_at: new Date().toISOString(),
+          last_login: null
+        }
+        
+        setAgents(prevAgents => [newAgent, ...prevAgents])
+        
         alert(`Agent created successfully!\n\nAgent ID: ${agentId}\nTemporary Password: ${tempPassword}${campaignInfo}\n\nPlease share these credentials with the agent.`)
         setFormData({ title: '', name: '', alias: '', email: '', phone: '', role: 'agent', campaign_id: '', date_of_birth: '' })
         setAliasSuggestions([])
         setShowAddModal(false)
-        fetchAgents()
       } else {
         const error = await response.json()
         alert('Error creating agent: ' + error.message)
