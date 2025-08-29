@@ -2183,9 +2183,9 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                         const hashedPassword = await bcrypt.hash(admin_password, 12);
                         
                         // Create user account
-                        db.run(`INSERT INTO users (user_id, username, password, name, email, role, center_id, status, created_by, temp_password) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                            [user_id, admin_username, hashedPassword, adminName, req.body.adminEmail || '', 'center_admin', centerId, 'active', req.user.id, admin_password],
+                        db.run(`INSERT INTO users (user_id, username, password, name, email, role, center_id, status, created_by) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [user_id, admin_username, hashedPassword, adminName, req.body.adminEmail || '', 'center_admin', centerId, 'active', req.user.id],
                             function(userErr) {
                                 if (userErr) {
                                     console.error('Error creating center admin user:', userErr.message);
