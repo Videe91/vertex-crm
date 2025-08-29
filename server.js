@@ -1895,9 +1895,9 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                 tokenBlacklist.add(req.token);
             }
 
-            // Update password in users table (remove temp_password for security, store current_password for center admin visibility)
-            db.run(`UPDATE users SET password = ?, temp_password = NULL, first_login = 0, current_password = ? WHERE id = ?`, 
-                [hashedNewPassword, newPassword, req.user.id], 
+            // Update password in users table
+            db.run(`UPDATE users SET password = ? WHERE id = ?`, 
+                [hashedNewPassword, req.user.id], 
                 function(updateErr) {
                     if (updateErr) {
                         console.error('Error updating password:', updateErr);
@@ -7052,11 +7052,9 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
         }
         
         const query = `
-            SELECT u.id, u.user_id as agent_id, u.username, u.title, u.name, u.alias, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login, u.temp_password, u.first_login, u.current_password, u.campaign_id,
-                   u.date_of_birth, c.campaign_name
+            SELECT u.id, u.user_id as agent_id, u.username, u.name, u.email, u.phone, 
+                   u.role, u.status, u.created_at, u.last_login
             FROM users u
-            LEFT JOIN campaigns c ON u.campaign_id = c.id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
             AND u.status != 'deleted'
@@ -7494,17 +7492,17 @@ app.get('/api/center-admin/agents/:id/password', authenticateToken, checkRole(['
             return res.status(500).json({ success: false, error: 'Failed to get center information' });
         }
         
-        // Get agent's temporary password (only for agents in the same center)
+        // Check if agent exists in the same center
         const query = `
-            SELECT temp_password 
+            SELECT id, username, name 
             FROM users 
             WHERE id = ? AND center_id = ? AND role IN ('agent', 'team_leader', 'manager', 'sme')
         `;
         
         db.get(query, [agentId, adminUser.center_id], (err, agent) => {
             if (err) {
-                console.error('Error fetching agent password:', err.message);
-                return res.status(500).json({ success: false, error: 'Failed to fetch password' });
+                console.error('Error fetching agent:', err.message);
+                return res.status(500).json({ success: false, error: 'Failed to fetch agent' });
             }
             
             if (!agent) {
@@ -7513,7 +7511,12 @@ app.get('/api/center-admin/agents/:id/password', authenticateToken, checkRole(['
             
             res.json({ 
                 success: true, 
-                temp_password: agent.temp_password 
+                message: 'For security reasons, passwords are not stored in plain text. Please use the password reset feature to generate a new password for this agent.',
+                agent: {
+                    id: agent.id,
+                    username: agent.username,
+                    name: agent.name
+                }
             });
         });
     } catch (error) {
