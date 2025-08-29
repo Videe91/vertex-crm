@@ -4302,10 +4302,10 @@ app.get('/api/clients', authenticateToken, checkRole(['super_admin']), (req, res
     db.all(query, [], (err, clients) => {
         if (err) {
             console.error('Error fetching clients:', err);
-            return res.status(500).json({ error: 'Failed to fetch clients' });
+            return res.status(500).json({ success: false, error: 'Failed to fetch clients' });
         }
         
-        res.json(clients);
+        res.json({ success: true, data: clients });
     });
 });
 
@@ -5978,7 +5978,7 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
         
         if (campaigns.length === 0) {
             console.log('[API] No campaigns found, returning empty array');
-            return res.json([]);
+            return res.json({ success: true, data: [] });
         }
 
         // For each campaign, get its center assignments
@@ -6018,7 +6018,7 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
         Promise.all(campaignPromises)
             .then(campaignsWithAssignments => {
                 console.log(`[API] Successfully processed ${campaignsWithAssignments.length} campaigns with assignments`);
-                res.json(campaignsWithAssignments);
+                res.json({ success: true, data: campaignsWithAssignments });
             })
             .catch(err => {
                 console.error('Error processing campaign assignments:', err.message);
