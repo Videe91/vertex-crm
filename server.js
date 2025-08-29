@@ -4454,7 +4454,12 @@ app.post('/api/clients', authenticateToken, checkRole(['super_admin']), (req, re
 
 // Get all clients
 app.get('/api/clients', authenticateToken, checkRole(['super_admin']), (req, res) => {
-    const query = `SELECT c.*, u.name as created_by_name
+    const query = `SELECT c.*, 
+                          CASE 
+                              WHEN u.first_name IS NOT NULL AND u.last_name IS NOT NULL 
+                              THEN u.first_name || ' ' || u.last_name
+                              ELSE u.username
+                          END as created_by_name
                    FROM clients c
                    LEFT JOIN users u ON c.created_by = u.id
                    WHERE c.status = 'active'
