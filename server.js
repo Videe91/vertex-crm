@@ -1926,18 +1926,23 @@ app.post('/api/auth/change-password', authenticateToken, passwordChangeValidatio
                     }
 
                     // For agents, store the new password in a way center admins can see it
-                    // We'll create a simple password tracking table for this purpose
                     if (user.role === 'agent' || user.role === 'team_leader' || user.role === 'manager' || user.role === 'sme') {
-                        // Create or update password tracking for center admin visibility
-                        db.run(`INSERT OR REPLACE INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
-                            [user.id, newPassword],
-                            function(trackErr) {
-                                if (trackErr) {
-                                    console.error('Error tracking agent password:', trackErr.message);
-                                    // Don't fail the password change if tracking fails
-                                }
+                        // Delete old entries and insert new one to avoid duplicates
+                        db.run(`DELETE FROM agent_passwords WHERE agent_id = ?`, [user.id], function(delErr) {
+                            if (delErr) {
+                                console.error('Error deleting old password entries:', delErr.message);
                             }
-                        );
+                            
+                            // Insert the new password
+                            db.run(`INSERT INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+                                [user.id, newPassword],
+                                function(trackErr) {
+                                    if (trackErr) {
+                                        console.error('Error tracking agent password:', trackErr.message);
+                                    }
+                                }
+                            );
+                        });
                     }
 
                     // Log activity
@@ -7075,12 +7080,14 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
             return res.status(500).json({ success: false, error: 'Failed to get center information' });
         }
         
-        // Get agents with current password for center admin visibility
+        // Get agents with their latest password for center admin visibility
         const query = `
             SELECT u.id, u.user_id as agent_id, u.username, u.name, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login, ap.current_password
+                   u.role, u.status, u.created_at, u.last_login, 
+                   (SELECT current_password FROM agent_passwords ap2 
+                    WHERE ap2.agent_id = u.id 
+                    ORDER BY ap2.updated_at DESC LIMIT 1) as current_password
             FROM users u
-            LEFT JOIN agent_passwords ap ON u.id = ap.agent_id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
             AND u.status != 'deleted'
@@ -7526,16 +7533,22 @@ app.put('/api/center-admin/agents/:id/reset-password', authenticateToken, checkR
                 return res.status(404).json({ success: false, error: 'Agent not found or access denied' });
             }
             
-            // Store the new password for center admin visibility
-            db.run(`INSERT OR REPLACE INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
-                [agentId, temp_password],
-                function(trackErr) {
-                    if (trackErr) {
-                        console.error('Error tracking reset password:', trackErr.message);
-                        // Don't fail the reset if tracking fails
-                    }
+            // Store the new password for center admin visibility (delete old entries first)
+            db.run(`DELETE FROM agent_passwords WHERE agent_id = ?`, [agentId], function(delErr) {
+                if (delErr) {
+                    console.error('Error deleting old password entries:', delErr.message);
                 }
-            );
+                
+                // Insert the new password
+                db.run(`INSERT INTO agent_passwords (agent_id, current_password, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)`,
+                    [agentId, temp_password],
+                    function(trackErr) {
+                        if (trackErr) {
+                            console.error('Error tracking reset password:', trackErr.message);
+                        }
+                    }
+                );
+            });
             
             res.json({ 
                 success: true, 
