@@ -2318,23 +2318,76 @@ app.put('/api/centers/:id', authenticateToken, checkRole(['super_admin']), (req,
     });
 });
 
-// DELETE /api/centers/:id - Soft delete center
+// DELETE /api/centers/:id - Hard delete center and related data
 app.delete('/api/centers/:id', authenticateToken, checkRole(['super_admin']), (req, res) => {
     const centerId = req.params.id;
 
-    db.run(`UPDATE centers SET status = 'deleted', updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [centerId], function(err) {
-        if (err) {
-            console.error('Error deleting center:', err.message);
-            return res.status(500).json({ success: false, error: 'Failed to delete center' });
-        }
+    // Start a transaction to delete all related data
+    db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+        
+        // Delete campaign assignments
+        db.run(`DELETE FROM campaign_center_assignments WHERE center_id = ?`, [centerId], function(err) {
+            if (err) {
+                console.error('Error deleting campaign assignments:', err.message);
+                db.run('ROLLBACK');
+                return res.status(500).json({ success: false, error: 'Failed to delete center assignments' });
+            }
+        });
+        
+        // Delete center admin users
+        db.run(`DELETE FROM users WHERE center_id = ? AND role = 'center_admin'`, [centerId], function(err) {
+            if (err) {
+                console.error('Error deleting center admin users:', err.message);
+                db.run('ROLLBACK');
+                return res.status(500).json({ success: false, error: 'Failed to delete center admin users' });
+            }
+        });
+        
+        // Delete agents associated with this center
+        db.run(`DELETE FROM users WHERE center_id = ? AND role IN ('agent', 'team_leader', 'manager', 'sme')`, [centerId], function(err) {
+            if (err) {
+                console.error('Error deleting center agents:', err.message);
+                db.run('ROLLBACK');
+                return res.status(500).json({ success: false, error: 'Failed to delete center agents' });
+            }
+        });
+        
+        // Delete leads associated with this center
+        db.run(`DELETE FROM leads WHERE center_id = ?`, [centerId], function(err) {
+            if (err) {
+                console.error('Error deleting center leads:', err.message);
+                db.run('ROLLBACK');
+                return res.status(500).json({ success: false, error: 'Failed to delete center leads' });
+            }
+        });
+        
+        // Finally delete the center itself
+        db.run(`DELETE FROM centers WHERE id = ?`, [centerId], function(err) {
+            if (err) {
+                console.error('Error deleting center:', err.message);
+                db.run('ROLLBACK');
+                return res.status(500).json({ success: false, error: 'Failed to delete center' });
+            }
 
-        if (this.changes === 0) {
-            return res.status(404).json({ success: false, error: 'Center not found' });
-        }
-
-        res.json({
-            success: true,
-            message: 'Center deleted successfully'
+            if (this.changes === 0) {
+                db.run('ROLLBACK');
+                return res.status(404).json({ success: false, error: 'Center not found' });
+            }
+            
+            // Commit the transaction
+            db.run('COMMIT', function(commitErr) {
+                if (commitErr) {
+                    console.error('Error committing transaction:', commitErr.message);
+                    return res.status(500).json({ success: false, error: 'Failed to complete deletion' });
+                }
+                
+                console.log(`Center ${centerId} and all related data deleted successfully`);
+                res.json({
+                    success: true,
+                    message: 'Center and all related data deleted successfully'
+                });
+            });
         });
     });
 });
@@ -6838,32 +6891,7 @@ app.put('/api/centers/:id/reset-password', authenticateToken, checkRole(['super_
     });
 });
 
-// DELETE /api/centers/:id - Delete center (soft delete)
-app.delete('/api/centers/:id', authenticateToken, checkRole(['super_admin']), (req, res) => {
-    const centerId = req.params.id;
 
-    const query = `
-        UPDATE centers 
-        SET status = 'deleted', updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    `;
-
-    db.run(query, [centerId], function(err) {
-        if (err) {
-            console.error('Error deleting center:', err.message);
-            return res.status(500).json({ success: false, error: 'Failed to delete center' });
-        }
-
-        if (this.changes === 0) {
-            return res.status(404).json({ success: false, error: 'Center not found' });
-        }
-
-        res.json({
-            success: true,
-            message: 'Center deleted successfully'
-        });
-    });
-});
 
 // ==================== CENTER ADMIN API ROUTES ====================
 
