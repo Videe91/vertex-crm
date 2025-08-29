@@ -2,53 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Responsive scrollbar utilities */
-@layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
-  
-  .scrollbar-thumb-gray-400 {
-    scrollbar-color: #9ca3af transparent;
-  }
-  
-  .scrollbar-track-transparent {
-    scrollbar-color: #9ca3af transparent;
-  }
-  
-  /* Webkit scrollbars for Chrome/Safari */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: #9ca3af;
-    border-radius: 3px;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: #6b7280;
-  }
-  
-  /* Responsive text sizing */
-  .text-responsive {
-    font-size: clamp(0.875rem, 2vw, 1rem);
-  }
-  
-  .text-responsive-lg {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
-  }
-  
-  .text-responsive-xl {
-    font-size: clamp(1.25rem, 3vw, 1.5rem);
-  }
-}
-
 /* Dark mode date picker styling */
 .dark input[type="date"] {
   color-scheme: dark;
