@@ -206,40 +206,38 @@ const PublicForm: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-md w-full mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8">
+      <div className="max-w-lg w-full mx-auto px-4">
+        <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-8">
           {/* Header */}
-          <div className="text-center mb-6">
-            {form.campaign_photo && (
-              <div className="flex justify-center mb-4">
-                <img 
-                  src={form.campaign_photo} 
-                  alt={form.campaign_name}
-                  className="max-w-32 max-h-16 mx-auto object-contain"
-                />
-              </div>
-            )}
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {form.name}
-            </h1>
-            {form.description && (
-              <p className="text-gray-600 text-sm">
-                {form.description}
-              </p>
-            )}
-            <div className="text-xs text-gray-500 mt-2">
-              {form.campaign_name}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              {form.campaign_photo && (
+                <div className="bg-white rounded-lg p-2">
+                  <img 
+                    src={form.campaign_photo} 
+                    alt={form.campaign_name}
+                    className="max-w-16 max-h-8 object-contain"
+                  />
+                </div>
+              )}
+              <h1 className="text-xl font-bold text-white">
+                {form.name}
+              </h1>
+            </div>
+            <div className="bg-slate-700 rounded-lg px-3 py-2 text-center">
+              <div className="text-xs text-slate-300 font-medium">Transfer Number</div>
+              <div className="text-sm font-bold text-blue-400">+1-833-539-7305</div>
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {form.form_fields.map((field) => (
               <div key={field.id}>
                 {field.type !== 'checkbox' && (
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.label} {field.required && <span className="text-red-500">*</span>}
+                  <label className="block text-sm font-medium text-white mb-2">
+                    {field.label} {field.required && <span className="text-red-400">*</span>}
                   </label>
                 )}
                 
@@ -250,7 +248,7 @@ const PublicForm: React.FC = () => {
                     placeholder={field.placeholder}
                     required={field.required}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   />
                 ) : field.type === 'select' ? (
                   <select
@@ -258,7 +256,7 @@ const PublicForm: React.FC = () => {
                     onChange={(e) => handleInputChange(field.name, e.target.value)}
                     required={field.required}
                     title={field.label}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   >
                     <option value="">Select an option</option>
                     {field.options?.map((option) => (
@@ -275,14 +273,14 @@ const PublicForm: React.FC = () => {
                       checked={Boolean(formData[field.name])}
                       onChange={(e) => handleInputChange(field.name, String(e.target.checked))}
                       required={field.required}
-                      className="mt-1 w-4 h-4 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500 focus:ring-2"
+                      className="mt-1 w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
                     />
                     <label 
                       htmlFor={field.name} 
-                      className="text-sm leading-relaxed text-gray-700 cursor-pointer"
+                      className="text-sm leading-relaxed text-slate-300 cursor-pointer"
                     >
                       {field.label}
-                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                      {field.required && <span className="text-red-400 ml-1">*</span>}
                     </label>
                   </div>
                 ) : (
@@ -292,24 +290,67 @@ const PublicForm: React.FC = () => {
                     onChange={(e) => handleInputChange(field.name, e.target.value)}
                     placeholder={field.placeholder}
                     required={field.required}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   />
                 )}
               </div>
             ))}
+            
+            {/* ZIP Code Field */}
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Service Area ZIP Code <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.zipcode || ''}
+                onChange={(e) => handleInputChange('zipcode', e.target.value)}
+                placeholder="Enter 5-digit ZIP code (e.g., 12345)"
+                required
+                pattern="[0-9]{5}"
+                maxLength={5}
+                className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+              <p className="text-xs text-slate-400 mt-1">
+                Enter at least 5 digits to check service availability. This field will be saved for our records only.
+              </p>
+            </div>
+            
+            {/* Consent Checkbox */}
+            <div>
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="consent"
+                  checked={formData.consent === 'true'}
+                  onChange={(e) => handleInputChange('consent', e.target.checked ? 'true' : 'false')}
+                  required
+                  className="mt-1 w-4 h-4 text-blue-600 bg-slate-700 border-slate-600 rounded focus:ring-blue-500 focus:ring-2"
+                />
+                <label 
+                  htmlFor="consent" 
+                  className="text-sm leading-relaxed text-slate-300 cursor-pointer"
+                >
+                  Before transferring you, I need your consent: By continuing, you agree to Vivint's Electronic 
+                  Disclosure, Terms of Service, and Privacy Policy. You also agree to receive marketing calls, 
+                  texts, and emails from Vivint - though this isn't required for purchase. You can opt-out 
+                  anytime by replying STOP. May I proceed with your transfer? <span className="text-red-400">*</span>
+                </label>
+              </div>
+            </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full bg-orange-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-slate-600 text-white py-4 px-6 rounded-lg font-medium hover:bg-slate-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {submitting ? 'Submitting...' : 'Submit'}
+              {submitting ? 'Processing...' : 'Complete Required Fields'}
             </button>
           </form>
 
           {center && (
-            <div className="mt-6 text-center text-xs text-gray-500">
-              Powered by {center.name} • Secured by Vertex CRM
+            <div className="mt-6 text-center text-xs text-slate-400">
+              Powered by {center?.name || 'Vertex CRM'} • Secured by Vertex CRM
             </div>
           )}
         </div>
