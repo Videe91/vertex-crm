@@ -891,6 +891,23 @@ function initializeDatabase() {
             FOREIGN KEY (center_id) REFERENCES centers(id)
         )`);
 
+        // Add missing columns to existing validation_logs table (migration)
+        db.run(`ALTER TABLE validation_logs ADD COLUMN blacklist2_status TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column name')) {
+                console.log('Column blacklist2_status already exists or other error:', err.message);
+            }
+        });
+        db.run(`ALTER TABLE validation_logs ADD COLUMN blacklist2_message TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column name')) {
+                console.log('Column blacklist2_message already exists or other error:', err.message);
+            }
+        });
+        db.run(`ALTER TABLE validation_logs ADD COLUMN blacklist2_raw_response TEXT`, (err) => {
+            if (err && !err.message.includes('duplicate column name')) {
+                console.log('Column blacklist2_raw_response already exists or other error:', err.message);
+            }
+        });
+
         // SUPPRESSION LIST - Internal blacklist
         db.run(`CREATE TABLE IF NOT EXISTS suppression_list (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
