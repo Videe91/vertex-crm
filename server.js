@@ -5249,23 +5249,7 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
             }
         }
         
-        // Save lead submission
-        const leadId = await new Promise((resolve, reject) => {
-            const query = `
-                INSERT INTO lead_submissions (form_id, center_id, center_code, first_name, last_name, 
-                                            phone, email, additional_data, ip_address, user_agent, agent_id, zipcode)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-            db.run(query, [
-                form.id, center.id, center_code, formData.first_name, formData.last_name,
-                formData.phone, formData.email, JSON.stringify(formData), ip_address, user_agent, agentId, formData.zipcode
-            ], function(err) {
-                if (err) reject(err);
-                else resolve(this.lastID);
-            });
-        });
-        
-        // Check for duplicate phone number across ALL centers and campaigns
+        // Check for duplicate phone number across ALL centers and campaigns FIRST
         const cleanPhone = formData.phone.replace(/\D/g, '');
         const duplicateCheck = await new Promise((resolve, reject) => {
             const query = `
@@ -5292,34 +5276,10 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
         });
         
         if (duplicateCheck) {
-            // Duplicate found - update current submission as rejected and return error
-            await new Promise((resolve, reject) => {
-                const updateQuery = `
-                    UPDATE lead_submissions 
-                    SET validation_status = 'rejected'
-                    WHERE id = ?
-                `;
-                db.run(updateQuery, [leadId], (err) => {
-                    if (err) reject(err);
-                    else resolve();
-                });
-            });
-            
-            // Role-based duplicate messaging for form submission too
-            let duplicateMessage, duplicateDetails;
-            
-            // For form submissions, we need to check if there's an authenticated user
-            // If agentId exists, it's an agent submission, otherwise it's public
-            if (agentId) {
-                // Agent submission - show generic message
-                duplicateMessage = `❌ ALREADY A CUSTOMER: This phone number is already in our system.`;
-                duplicateDetails = {
-                    message: 'Please try a different phone number.'
-                };
-            } else {
-                // Public submission - can show more details since it's not competitive
-                duplicateMessage = `❌ DUPLICATE CUSTOMER: This phone number was already used by ${duplicateCheck.center_name} on ${new Date(duplicateCheck.created_at).toLocaleDateString()}`;
-                duplicateDetails = {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'ALREADY A CUSTOMER: This phone number is already in our system.',
+                duplicate_info: {
                     center: duplicateCheck.center_name,
                     center_code: duplicateCheck.center_code,
                     agent: duplicateCheck.first_name && duplicateCheck.last_name 
@@ -5327,15 +5287,25 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
                         : 'Unknown Agent',
                     date: new Date(duplicateCheck.created_at).toLocaleDateString(),
                     campaign: duplicateCheck.campaign_name || 'Unknown Campaign'
-                };
-            }
-            
-            return res.json({ 
-                success: false, 
-                message: duplicateMessage,
-                duplicate_details: duplicateDetails
+                }
             });
         }
+        
+        // Save lead submission (only if no duplicate found)
+        const leadId = await new Promise((resolve, reject) => {
+            const query = `
+                INSERT INTO lead_submissions (form_id, center_id, center_code, first_name, last_name, 
+                                            phone, email, additional_data, ip_address, user_agent, agent_id, zipcode)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            db.run(query, [
+                form.id, center.id, center_code, formData.first_name, formData.last_name,
+                formData.phone, formData.email, JSON.stringify(formData), ip_address, user_agent, agentId, formData.zipcode
+            ], function(err) {
+                if (err) reject(err);
+                else resolve(this.lastID);
+            });
+        });
 
         // No duplicate found - proceed with phone validation using existing validation system
         const validation = await validatePhoneComplete(formData.phone, agentId, center.id);
