@@ -1,5 +1,15 @@
+[phases.setup]
+nixPkgs = ["nodejs", "npm"]
+
+[phases.install]
+cmds = ["npm ci"]
+
 [phases.build]
-cmds = ["npm run build"]
+cmds = [
+  "npm run build",
+  "ls -la dist/",
+  "ls -la dist/assets/ || echo 'Assets folder missing'"
+]
 
 [phases.start]
 cmd = "node server.js"

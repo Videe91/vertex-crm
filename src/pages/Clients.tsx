@@ -39,7 +39,9 @@ const Clients: React.FC = () => {
     mainClientNames: [''], // Array of main client names for brokers
     contactPersonName: '', // Contact person on client side
     contactEmail: '', // Contact person email
-    country: '' // Client's business country (where company is based)
+    country: '', // Client's business country (where company is based)
+    sector: '', // Business sector: 'lead_generation' or 'sales'
+    salesType: '' // Sales type (required if sector is 'sales')
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
@@ -95,7 +97,9 @@ const Clients: React.FC = () => {
       mainClientNames: mainClientNames.filter(name => name.trim() !== ''),
       contactPersonName: client.contact_person_name,
       contactEmail: client.contact_email,
-      country: client.country
+      country: client.country,
+      sector: client.sector || '',
+      salesType: client.sales_type || ''
     })
     setShowAddClientModal(true)
   }
@@ -130,7 +134,9 @@ const Clients: React.FC = () => {
       mainClientNames: [''],
       contactPersonName: '',
       contactEmail: '',
-      country: ''
+      country: '',
+      sector: '',
+      salesType: ''
     })
     setEditingClient(null)
     setFormError('')
@@ -202,6 +208,14 @@ const Clients: React.FC = () => {
     }
     if (!formData.country) {
       setFormError('Please select country')
+      return
+    }
+    if (!formData.sector) {
+      setFormError('Please select business sector')
+      return
+    }
+    if (formData.sector === 'sales' && !formData.salesType) {
+      setFormError('Please select sales type')
       return
     }
 
@@ -781,6 +795,84 @@ const Clients: React.FC = () => {
                     Where the client company is based (campaign countries will be specified per campaign)
                   </p>
                 </div>
+
+                {/* Business Sector */}
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Business Sector *
+                  </label>
+                  <div className="relative">
+                    <Target className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                      isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                    }`} />
+                    <select
+                      required
+                      value={formData.sector}
+                      onChange={(e) => handleInputChange('sector', e.target.value)}
+                      aria-label="Select business sector"
+                      className={`w-full pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-300 appearance-none ${
+                        isDarkMode
+                          ? 'bg-white/5 border border-white/20 text-white'
+                          : 'bg-white/50 border border-gray-300 text-gray-900'
+                      }`}
+                    >
+                      <option value="">Select business sector</option>
+                      <option value="lead_generation">Lead Generation</option>
+                      <option value="sales">Sales</option>
+                    </select>
+                    <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`} />
+                  </div>
+                  <p className={`text-xs mt-1 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Type of business services provided
+                  </p>
+                </div>
+
+                {/* Sales Type - Only show if sector is sales */}
+                {formData.sector === 'sales' && (
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Sales Type *
+                    </label>
+                    <div className="relative">
+                      <Target className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                        isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                      }`} />
+                      <select
+                        required
+                        value={formData.salesType}
+                        onChange={(e) => handleInputChange('salesType', e.target.value)}
+                        aria-label="Select sales type"
+                        className={`w-full pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-300 appearance-none ${
+                          isDarkMode
+                            ? 'bg-white/5 border border-white/20 text-white'
+                            : 'bg-white/50 border border-gray-300 text-gray-900'
+                        }`}
+                      >
+                        <option value="">Select sales type</option>
+                        <option value="b2b">B2B Sales</option>
+                        <option value="b2c">B2C Sales</option>
+                        <option value="enterprise">Enterprise Sales</option>
+                        <option value="retail">Retail Sales</option>
+                      </select>
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`} />
+                    </div>
+                    <p className={`text-xs mt-1 ${
+                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Specific type of sales operations
+                    </p>
+                  </div>
+                )}
 
                 {/* Error Message */}
                 {formError && (
