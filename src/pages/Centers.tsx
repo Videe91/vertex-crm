@@ -2350,43 +2350,14 @@ const Centers: React.FC = () => {
                     </h4>
                     
                     {/* Check if center has operational data */}
-                    {(() => {
-                      const hasAgents = Math.random() > 0.3 // Mock condition - replace with real data check
-                      
-                      if (!hasAgents) {
-                        return (
-                          <div className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
-                            <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                              No operational data yet. Add agents to start tracking analytics.
-                            </div>
-                          </div>
-                        )
-                      }
-                      
-                      return (
-                        <>
-                          {/* Quick Stats */}
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-blue-500/20' : 'bg-blue-50'}`}>
-                              <div className={`text-sm ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                Total Agents
-                              </div>
-                              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                {Math.floor(Math.random() * 25) + 5}
-                              </div>
-                            </div>
-                            <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-green-500/20' : 'bg-green-50'}`}>
-                              <div className={`text-sm ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                                Today's Sales
-                              </div>
-                              <div className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                                ${(Math.random() * 50000 + 10000).toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="flex gap-2 pt-2">
+                    <div className={`p-4 rounded-lg text-center ${isDarkMode ? 'bg-gray-700/30' : 'bg-gray-50'}`}>
+                      <div className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Analytics available after adding agents and campaigns.
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2">
                             <button
                               className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                                 isDarkMode
@@ -2409,10 +2380,7 @@ const Centers: React.FC = () => {
                             >
                               Full Report
                             </button>
-                          </div>
-                        </>
-                      )
-                    })()}
+                    </div>
                   </div>
                 )}
               </div>
