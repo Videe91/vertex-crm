@@ -5106,7 +5106,7 @@ app.get('/api/forms/public/:slug', (req, res) => {
         
         // Get center info if provided
         if (center) {
-            const centerQuery = `SELECT id, name, code FROM centers WHERE code = ? AND status = 'active'`;
+            const centerQuery = `SELECT id, center_name as name, center_code as code FROM centers WHERE center_code = ? AND status = 'active'`;
             db.get(centerQuery, [center], (err, centerData) => {
                 if (err || !centerData) {
                     return res.status(400).json({ success: false, error: 'Invalid center code' });
@@ -5115,6 +5115,7 @@ app.get('/api/forms/public/:slug', (req, res) => {
                 res.json({ success: true, data: { ...form, center: centerData } });
             });
         } else {
+            // For preview mode (no center required), return form without center info
             res.json({ success: true, data: form });
         }
     });

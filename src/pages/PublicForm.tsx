@@ -61,7 +61,8 @@ const PublicForm: React.FC = () => {
   const fetchForm = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/forms/public/${slug}?center=${centerCode}`)
+      const centerParam = centerCode ? `?center=${centerCode}` : ''
+      const response = await fetch(`/api/forms/public/${slug}${centerParam}`)
       const data = await response.json()
       
       if (data.success) {
