@@ -83,14 +83,13 @@ const CenterAdminCampaigns: React.FC = () => {
   const fetchCampaignStats = async (campaignList: Campaign[]) => {
     const stats: { [key: number]: CampaignStats } = {}
     
-    // For now, we'll use mock data since we don't have call tracking yet
-    // In the future, this would fetch real stats from the API
+    // Initialize with zero values - no mock data
     campaignList.forEach(campaign => {
       stats[campaign.id] = {
-        totalCalls: Math.floor(Math.random() * 500) + 100,
-        conversions: Math.floor(Math.random() * 50) + 10,
-        revenue: Math.floor(Math.random() * 10000) + 1000,
-        conversionRate: Math.floor(Math.random() * 20) + 5
+        totalCalls: 0,
+        conversions: 0,
+        revenue: 0,
+        conversionRate: 0
       }
     })
     
