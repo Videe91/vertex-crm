@@ -2111,8 +2111,8 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
         
         console.log('Validation passed - all required fields present');
 
-        // Check if center code already exists (check both old and new columns)
-        db.get(`SELECT * FROM centers WHERE center_code = ? OR code = ?`, [centerCode, centerCode], (err, existing) => {
+        // Check if center code already exists
+        db.get(`SELECT * FROM centers WHERE center_code = ?`, [centerCode], (err, existing) => {
             if (err) {
                 console.error('Error checking center code:', err.message);
                 return res.status(500).json({ success: false, error: 'Internal server error' });
@@ -2127,17 +2127,15 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
 
             const query = `
                 INSERT INTO centers (
-                    campaign_id, center_name, center_code, name, code, country, address, manager_name,
+                    campaign_id, center_name, center_code, country, address, manager_name,
                     status, created_by, updated_at, admin_password
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
             `;
 
             db.run(query, [
                 campaignId || null, // Use null if campaignId is empty
                 centerName,
                 centerCode,
-                centerName, // Also set old 'name' column for backward compatibility
-                centerCode, // Also set old 'code' column for backward compatibility
                 country,
                 address,
                 adminName,
@@ -2151,8 +2149,6 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                     console.error('SQL Query:', query);
                     console.error('Query parameters:', [
                         campaignId || null,
-                        centerName,
-                        centerCode,
                         centerName,
                         centerCode,
                         country,
