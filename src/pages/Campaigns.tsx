@@ -804,7 +804,7 @@ const Campaigns: React.FC = () => {
                         <div className="flex items-center justify-center space-x-3">
                           {campaign.photo_url && (
                             <img 
-                              src={`http://localhost:3000${campaign.photo_url}`}
+                              src={campaign.photo_url}
                               alt={`${campaign.campaign_name} thumbnail`}
                               className="w-12 h-12 rounded-lg object-cover border-2 border-gray-300 dark:border-gray-600"
                               onError={(e) => {

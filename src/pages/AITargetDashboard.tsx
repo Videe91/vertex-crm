@@ -131,7 +131,7 @@ const AITargetDashboard: React.FC = () => {
     try {
       console.log('Fetching centers for campaign:', campaignId)
       // Temporarily use test endpoint
-      const response = await fetch(`http://localhost:3000/api/test/centers/${campaignId}`)
+      const response = await fetch(`/api/test/centers/${campaignId}`)
       const data = await response.json()
       console.log('Centers response:', data)
       if (data.success) {
