@@ -7587,99 +7587,8 @@ app.get('/api/center-admin/agent-performance', authenticateToken, checkRole(['ce
                 return res.status(500).json({ success: false, error: 'Failed to fetch agent performance data' });
             }
             
-            // If no real data, provide demo data for development
+            // If no real data, return empty array
             if (!agents || agents.length === 0) {
-                const demoAgents = [
-                    {
-                        agent_id: 1,
-                        agent_name: 'Sarah Johnson',
-                        username: 'sarah.j',
-                        total_leads: 87,
-                        successful_submissions: 74,
-                        conversions: 23,
-                        revenue: 5520,
-                        today_leads: 12,
-                        week_leads: 45
-                    },
-                    {
-                        agent_id: 2,
-                        agent_name: 'Mike Chen',
-                        username: 'mike.c',
-                        total_leads: 79,
-                        successful_submissions: 68,
-                        conversions: 19,
-                        revenue: 4560,
-                        today_leads: 10,
-                        week_leads: 38
-                    },
-                    {
-                        agent_id: 3,
-                        agent_name: 'Emily Davis',
-                        username: 'emily.d',
-                        total_leads: 72,
-                        successful_submissions: 61,
-                        conversions: 17,
-                        revenue: 4080,
-                        today_leads: 9,
-                        week_leads: 34
-                    },
-                    {
-                        agent_id: 4,
-                        agent_name: 'John Smith',
-                        username: 'john.s',
-                        total_leads: 65,
-                        successful_submissions: 54,
-                        conversions: 14,
-                        revenue: 3360,
-                        today_leads: 8,
-                        week_leads: 29
-                    },
-                    {
-                        agent_id: 5,
-                        agent_name: 'Lisa Wang',
-                        username: 'lisa.w',
-                        total_leads: 58,
-                        successful_submissions: 48,
-                        conversions: 12,
-                        revenue: 2880,
-                        today_leads: 7,
-                        week_leads: 26
-                    },
-                    {
-                        agent_id: 6,
-                        agent_name: 'David Rodriguez',
-                        username: 'david.r',
-                        total_leads: 52,
-                        successful_submissions: 43,
-                        conversions: 11,
-                        revenue: 2640,
-                        today_leads: 6,
-                        week_leads: 23
-                    },
-                    {
-                        agent_id: 7,
-                        agent_name: 'Anna Thompson',
-                        username: 'anna.t',
-                        total_leads: 46,
-                        successful_submissions: 38,
-                        conversions: 9,
-                        revenue: 2160,
-                        today_leads: 5,
-                        week_leads: 20
-                    },
-                    {
-                        agent_id: 8,
-                        agent_name: 'James Wilson',
-                        username: 'james.w',
-                        total_leads: 41,
-                        successful_submissions: 33,
-                        conversions: 8,
-                        revenue: 1920,
-                        today_leads: 4,
-                        week_leads: 18
-                    }
-                ];
-                
                 return res.json({ success: true, agents: [] });
             }
             
@@ -8039,61 +7948,7 @@ app.get('/api/center-admin/agent-attendance-heatmap', authenticateToken, checkRo
         ORDER BY al.name, dr.date DESC
     `;
     
-    // Add demo data if no real data exists
-    const demoQuery = `
-        WITH RECURSIVE date_range AS (
-            SELECT DATE('now') as date, 0 as day_offset
-            UNION ALL
-            SELECT DATE('now', '-' || (day_offset + 1) || ' days'), day_offset + 1
-            FROM date_range
-            WHERE day_offset < 89
-        ),
-        demo_agents AS (
-            SELECT 1 as id, 'John Smith' as name, 'john.smith' as username
-            UNION SELECT 2, 'Sarah Johnson', 'sarah.j'
-            UNION SELECT 3, 'Mike Wilson', 'mike.w'
-            UNION SELECT 4, 'Lisa Chen', 'lisa.c'
-            UNION SELECT 5, 'David Brown', 'david.b'
-            UNION SELECT 6, 'Emma Davis', 'emma.d'
-        )
-        SELECT 
-            da.id as agent_id,
-            da.name as agent_name,
-            da.username,
-            dr.date,
-            CASE 
-                WHEN ABS(RANDOM()) % 10 = 0 THEN 0  -- 10% absent
-                WHEN ABS(RANDOM()) % 5 = 0 THEN 1   -- 20% single session
-                ELSE 1 + (ABS(RANDOM()) % 3)        -- 70% multiple sessions
-            END as login_sessions,
-            CASE 
-                WHEN ABS(RANDOM()) % 10 = 0 THEN 0  -- 10% no work
-                ELSE 4 + (ABS(RANDOM()) % 6)        -- 4-9 hours
-            END as hours_worked,
-            DATETIME(dr.date || ' 09:00:00') as first_login,
-            DATETIME(dr.date || ' 17:30:00') as last_activity,
-            CASE 
-                WHEN ABS(RANDOM()) % 10 = 0 THEN 0  -- 10% no leads
-                ELSE 5 + (ABS(RANDOM()) % 20)       -- 5-24 leads
-            END as leads_submitted,
-            CASE 
-                WHEN ABS(RANDOM()) % 10 = 0 THEN 0  -- 10% no successful
-                ELSE 3 + (ABS(RANDOM()) % 15)       -- 3-17 successful
-            END as successful_submissions,
-            CASE 
-                WHEN ABS(RANDOM()) % 5 = 0 THEN 0   -- 20% no conversions
-                ELSE ABS(RANDOM()) % 5               -- 0-4 conversions
-            END as conversions,
-            CASE 
-                WHEN ABS(RANDOM()) % 10 = 0 THEN 'absent'
-                WHEN ABS(RANDOM()) % 8 = 0 THEN 'present_low_productivity'
-                WHEN ABS(RANDOM()) % 6 = 0 THEN 'present_only'
-                ELSE 'high_productivity'
-            END as activity_level
-        FROM demo_agents da
-        CROSS JOIN date_range dr
-        ORDER BY da.name, dr.date DESC
-    `;
+
     
     db.all(query, params, (err, rows) => {
         if (err) {
