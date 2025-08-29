@@ -7109,7 +7109,10 @@ app.post('/api/center-admin/agents', authenticateToken, checkRole(['center_admin
         // Check for duplicate alias globally within the same campaign
         if (alias && alias.trim()) {
             const existingAlias = await new Promise((resolve, reject) => {
-                db.get('SELECT id, name FROM users WHERE campaign_id = ? AND alias = ? AND alias IS NOT NULL AND alias != ""', 
+                db.get(`SELECT u.id, u.name FROM users u 
+                        JOIN centers c ON u.center_id = c.id 
+                        JOIN campaign_center_assignments cca ON c.id = cca.center_id 
+                        WHERE cca.campaign_id = ? AND u.alias = ? AND u.alias IS NOT NULL AND u.alias != ""`, 
                     [campaign_id, alias.trim()], (err, user) => {
                     if (err) reject(err);
                     else resolve(user);
@@ -7129,11 +7132,11 @@ app.post('/api/center-admin/agents', authenticateToken, checkRole(['center_admin
         
         // Insert new agent
         const insertQuery = `
-            INSERT INTO users (user_id, username, password, title, name, alias, email, phone, role, center_id, status, temp_password, first_login, campaign_id, date_of_birth, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?, 1, ?, ?, CURRENT_TIMESTAMP)
+            INSERT INTO users (user_id, username, password, name, email, phone, role, center_id, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', CURRENT_TIMESTAMP)
         `;
         
-        db.run(insertQuery, [agent_id, agent_id, hashedPassword, title, name, alias || '', email, phone || '', role, adminUser.center_id, temp_password, campaign_id, date_of_birth || null], function(err) {
+        db.run(insertQuery, [agent_id, agent_id, hashedPassword, name, email, phone || '', role, adminUser.center_id], function(err) {
             if (err) {
                 console.error('Error creating agent:', err.message);
                 if (err.message.includes('UNIQUE constraint failed')) {
@@ -7192,7 +7195,10 @@ app.post('/api/center-admin/generate-alias', authenticateToken, checkRole(['cent
         if (campaignId) {
             // Campaign-specific global alias check
             existingAliases = await new Promise((resolve, reject) => {
-                db.all('SELECT DISTINCT alias FROM users WHERE campaign_id = ? AND alias IS NOT NULL AND alias != ""', 
+                db.all(`SELECT DISTINCT u.alias FROM users u 
+                        JOIN centers c ON u.center_id = c.id 
+                        JOIN campaign_center_assignments cca ON c.id = cca.center_id 
+                        WHERE cca.campaign_id = ? AND u.alias IS NOT NULL AND u.alias != ""`, 
                     [campaignId], (err, rows) => {
                     if (err) reject(err);
                     else resolve(rows.map(row => row.alias));
