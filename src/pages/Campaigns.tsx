@@ -71,9 +71,9 @@ const Campaigns: React.FC = () => {
     departmentTransferNumber: '', // Transfer number for department
     campaignPhoto: null as File | null,
     // Payment Terms
-    paymentType: '', // 'per_sale', 'per_install', 'per_lead', 'monthly', 'per_appointment'
+    paymentType: 'per_sale', // 'per_sale', 'per_install', 'per_lead', 'monthly', 'per_appointment'
     clientRate: '', // How much client pays you
-    paymentFrequency: '' // 'per_transaction', 'monthly', 'weekly'
+    paymentFrequency: 'per_transaction' // 'per_transaction', 'monthly', 'weekly'
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
@@ -500,9 +500,9 @@ const Campaigns: React.FC = () => {
       transferToDepartment: '',
       departmentTransferNumber: '',
       campaignPhoto: null,
-      paymentType: '',
+      paymentType: 'per_sale',
       clientRate: '',
-      paymentFrequency: ''
+      paymentFrequency: 'per_transaction'
     })
     setEditingCampaign(null)
     setFormError('')
@@ -588,6 +588,20 @@ const Campaigns: React.FC = () => {
         setFormError('Department transfer number is required')
         return
       }
+    }
+
+    // Validate payment fields
+    if (!formData.paymentType) {
+      setFormError('Please select payment type')
+      return
+    }
+    if (!formData.clientRate) {
+      setFormError('Please enter client rate')
+      return
+    }
+    if (!formData.paymentFrequency) {
+      setFormError('Please select payment frequency')
+      return
     }
 
     setIsSubmitting(true)
@@ -1435,7 +1449,122 @@ const Campaigns: React.FC = () => {
                 </p>
               </div>
 
+              {/* Payment Terms Section */}
+              <div className={`p-6 rounded-xl border ${
+                isDarkMode 
+                  ? 'bg-white/5 border-white/10' 
+                  : 'bg-gray-50/50 border-gray-200/50'
+              }`}>
+                <h3 className={`text-lg font-semibold mb-4 ${
+                  isDarkMode ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Payment Terms
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Payment Type */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Payment Type *
+                    </label>
+                    <div className="relative">
+                      <DollarSign className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                        isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                      }`} />
+                      <select
+                        required
+                        value={formData.paymentType}
+                        onChange={(e) => handleInputChange('paymentType', e.target.value)}
+                        aria-label="Select payment type"
+                        className={`w-full pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-300 appearance-none ${
+                          isDarkMode
+                            ? 'bg-white/5 border border-white/20 text-white'
+                            : 'bg-white/50 border border-gray-300 text-gray-900'
+                        }`}
+                      >
+                        <option value="">Select payment type</option>
+                        <option value="per_sale">Per Sale</option>
+                        <option value="per_install">Per Install</option>
+                        <option value="per_lead">Per Lead</option>
+                        <option value="per_appointment">Per Appointment</option>
+                        <option value="monthly">Monthly Retainer</option>
+                      </select>
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`} />
+                    </div>
+                  </div>
 
+                  {/* Client Rate */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Rate Amount *
+                    </label>
+                    <div className="relative">
+                      <DollarSign className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                        isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                      }`} />
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        required
+                        value={formData.clientRate}
+                        onChange={(e) => handleInputChange('clientRate', e.target.value)}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-300 ${
+                          isDarkMode
+                            ? 'bg-white/5 border border-white/20 text-white placeholder-gray-400'
+                            : 'bg-white/50 border border-gray-300 text-gray-900 placeholder-gray-500'
+                        }`}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment Frequency */}
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      isDarkMode ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Payment Frequency *
+                    </label>
+                    <div className="relative">
+                      <CheckCircle className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                        isDarkMode ? 'text-orange-400' : 'text-orange-600'
+                      }`} />
+                      <select
+                        required
+                        value={formData.paymentFrequency}
+                        onChange={(e) => handleInputChange('paymentFrequency', e.target.value)}
+                        aria-label="Select payment frequency"
+                        className={`w-full pl-12 pr-10 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all duration-300 appearance-none ${
+                          isDarkMode
+                            ? 'bg-white/5 border border-white/20 text-white'
+                            : 'bg-white/50 border border-gray-300 text-gray-900'
+                        }`}
+                      >
+                        <option value="">Select frequency</option>
+                        <option value="per_transaction">Per Transaction</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                      </select>
+                      <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`} />
+                    </div>
+                  </div>
+                </div>
+                
+                <p className={`text-xs mt-3 ${
+                  isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Define how and when you get paid for this campaign
+                </p>
+              </div>
 
               {/* Error Message */}
               {formError && (
