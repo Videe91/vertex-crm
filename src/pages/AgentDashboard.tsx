@@ -236,11 +236,11 @@ const AgentDashboard = () => {
       <Sidebar isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} activeItem="dashboard" />
       
       {/* Main Content */}
-      <div className="flex-1 ml-24 transition-all duration-300">
+      <div className="flex-1 transition-all duration-300 scale-smooth" style={{ marginLeft: 'clamp(280px, 20vw, 320px)' }}>
         {/* Top Header */}
         <Header title="Agent Dashboard" isDarkMode={isDarkMode} />
         
-        <div className="p-8">
+        <div className="p-auto">
         {/* Welcome Message */}
         <div className="mb-8">
           {loadingWelcome ? (
