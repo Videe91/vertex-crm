@@ -7452,11 +7452,11 @@ app.put('/api/center-admin/agents/:id/reset-password', authenticateToken, checkR
         // Update agent password (only for agents in the same center)
         const updateQuery = `
             UPDATE users 
-            SET password = ?, temp_password = ?, first_login = 1, updated_at = CURRENT_TIMESTAMP
+            SET password = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ? AND center_id = ?
         `;
         
-        db.run(updateQuery, [hashedPassword, temp_password, agentId, adminUser.center_id], function(err) {
+        db.run(updateQuery, [hashedPassword, agentId, adminUser.center_id], function(err) {
             if (err) {
                 console.error('Error resetting password:', err.message);
                 return res.status(500).json({ success: false, error: 'Failed to reset password' });

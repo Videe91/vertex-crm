@@ -282,8 +282,9 @@ const CenterAgents: React.FC = () => {
   // Copy password to clipboard
   const copyPassword = async (agent: Agent) => {
     try {
-      if (agent.temp_password) {
-        await navigator.clipboard.writeText(agent.temp_password)
+      const password = agent.temp_password || agent.current_password
+      if (password) {
+        await navigator.clipboard.writeText(password)
         setCopiedPasswords(prev => ({ ...prev, [agent.id]: true }))
         setTimeout(() => {
           setCopiedPasswords(prev => ({ ...prev, [agent.id]: false }))
@@ -609,13 +610,13 @@ const CenterAgents: React.FC = () => {
                         <td className="px-2 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <div className={`text-sm font-mono ${isDarkMode ? 'text-orange-400' : 'text-orange-600'}`}>
-                              {agent.first_login === 1 && agent.temp_password ? (
+                              {agent.temp_password ? (
                                 passwordVisibility[agent.id] ? agent.temp_password : '••••••••'
                               ) : agent.current_password ? (
                                 passwordVisibility[agent.id] ? agent.current_password : '••••••••'
-                              ) : agent.first_login === 0 ? 'Set' : 'Not set'}
+                              ) : 'Password set - use reset to view'}
                             </div>
-                            {((agent.first_login === 1 && agent.temp_password) || agent.current_password) && (
+                            {(agent.temp_password || agent.current_password) && (
                               <button
                                 onClick={() => togglePasswordVisibility(agent.id)}
                                 className={`p-1 rounded transition-colors ${
