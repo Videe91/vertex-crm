@@ -2840,7 +2840,7 @@ async function validatePhoneComplete(phone, agentId, centerId) {
         
         // 4. Check TCPA (DNC + Litigators)
         const tcpaUsername = 'tcpa_9TiLbuIyUy';
-        const tcpaPassword = 'FeR7·Evdf·ALsx·9QDX·Bco2·s5C7';
+        const tcpaPassword = 'FeR7-Evdf-ALsx-9QDX-Bco2-s5C7';
         if (tcpaUsername && tcpaPassword) {
             try {
                 const tcpaAuth = Buffer.from(`${tcpaUsername}:${tcpaPassword}`).toString('base64');
