@@ -2167,9 +2167,12 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                 try {
                     const { admin_username, admin_password } = req.body;
                     
-                    console.log('Creating center admin user account:');
-                    console.log('Username:', admin_username);
-                    console.log('Password:', admin_password ? '***PROVIDED***' : 'NOT PROVIDED');
+                    console.log('=== CENTER ADMIN USER CREATION DEBUG ===');
+                    console.log('Full request body keys:', Object.keys(req.body));
+                    console.log('admin_username:', admin_username);
+                    console.log('admin_password exists:', !!admin_password);
+                    console.log('admin_password length:', admin_password ? admin_password.length : 0);
+                    console.log('Condition check - admin_username && admin_password:', !!(admin_username && admin_password));
                     
                     if (admin_username && admin_password) {
                         // Generate user ID for center admin
@@ -2191,9 +2194,13 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                                 console.log('Center admin user created successfully:', admin_username);
                             }
                         );
+                    } else {
+                        console.log('❌ SKIPPING admin user creation - missing credentials');
+                        console.log('admin_username present:', !!admin_username);
+                        console.log('admin_password present:', !!admin_password);
                     }
                 } catch (userCreationError) {
-                    console.error('Error in center admin user creation:', userCreationError);
+                    console.error('❌ ERROR in center admin user creation:', userCreationError);
                 }
 
                 // Create campaign assignment if campaignId is provided
