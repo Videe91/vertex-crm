@@ -902,6 +902,36 @@ function initializeDatabase() {
             FOREIGN KEY (center_id) REFERENCES centers(id)
         )`);
 
+        // CAMPAIGN SUPPRESSION - Campaign-specific suppression lists
+        db.run(`CREATE TABLE IF NOT EXISTS campaign_suppression (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            campaign_id INTEGER NOT NULL,
+            phone TEXT NOT NULL,
+            upload_batch_id TEXT,
+            source_filename TEXT,
+            uploaded_by INTEGER,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id),
+            UNIQUE(campaign_id, phone)
+        )`);
+
+        // SUPPRESSION UPLOADS - Track suppression file uploads
+        db.run(`CREATE TABLE IF NOT EXISTS suppression_uploads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            batch_id TEXT UNIQUE NOT NULL,
+            filename TEXT NOT NULL,
+            campaign_id INTEGER NOT NULL,
+            total_numbers INTEGER DEFAULT 0,
+            processed_numbers INTEGER DEFAULT 0,
+            duplicate_numbers INTEGER DEFAULT 0,
+            uploaded_by INTEGER NOT NULL,
+            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'processing',
+            FOREIGN KEY (campaign_id) REFERENCES campaigns(id) ON DELETE CASCADE,
+            FOREIGN KEY (uploaded_by) REFERENCES users(id)
+        )`);
+
         // SCRUB USAGE - Track API usage for billing
         db.run(`CREATE TABLE IF NOT EXISTS scrub_usage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
