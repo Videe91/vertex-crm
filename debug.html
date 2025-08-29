@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f0f0f0;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🔍 VERTEX CRM Debug Test</h1>
+        <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+        <p><strong>Environment:</strong> <span id="env">Unknown</span></p>
+        <p><strong>API Base:</strong> <span id="api">Unknown</span></p>
+        <div id="tests"></div>
+    </div>
+
+    <script>
+        console.log('🔍 Debug script loaded');
+        
+        // Update status
+        document.getElementById('status').textContent = 'HTML Loaded Successfully';
+        document.getElementById('env').textContent = window.location.hostname;
+        
+        // Test API connectivity
+        const apiBase = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : '/api';
+        document.getElementById('api').textContent = apiBase;
+        
+        // Test API health
+        fetch(apiBase + '/health')
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ API Health:', data);
+                const testsDiv = document.getElementById('tests');
+                testsDiv.innerHTML = '<p style="color: green;">✅ API Connection: Success</p><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                console.error('❌ API Health Error:', error);
+                const testsDiv = document.getElementById('tests');
+                testsDiv.innerHTML = '<p style="color: red;">❌ API Connection: Failed</p><p>' + error.message + '</p>';
+            });
+    </script>
+</body>
+</html>
