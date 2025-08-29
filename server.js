@@ -5223,7 +5223,7 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
         }
         
         const center = await new Promise((resolve, reject) => {
-            db.get('SELECT id, name, code FROM centers WHERE code = ? AND status = "active"', 
+            db.get('SELECT id, center_name as name, center_code as code FROM centers WHERE center_code = ? AND status = "active"', 
                    [center_code], (err, row) => {
                 if (err) reject(err);
                 else resolve(row);
@@ -5271,7 +5271,7 @@ app.post('/api/forms/submit/:slug', async (req, res) => {
             const query = `
                 SELECT 
                     ls.id, ls.phone, ls.created_at, ls.center_id, ls.agent_id,
-                    c.name as center_name, c.code as center_code,
+                    c.center_name, c.center_code,
                     u.first_name, u.last_name, u.username,
                     lf.name as form_name,
                     camp.campaign_name
