@@ -7051,14 +7051,11 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
             return res.status(500).json({ success: false, error: 'Failed to get center information' });
         }
         
+        // First, let's get agents without JOINs to avoid potential issues
         const query = `
             SELECT u.id, u.user_id as agent_id, u.username, u.name, u.email, u.phone, 
-                   u.role, u.status, u.created_at, u.last_login,
-                   c.campaign_name, c.id as campaign_id
+                   u.role, u.status, u.created_at, u.last_login
             FROM users u
-            LEFT JOIN centers cent ON u.center_id = cent.id
-            LEFT JOIN campaign_center_assignments cca ON cent.id = cca.center_id AND cca.status = 'active'
-            LEFT JOIN campaigns c ON cca.campaign_id = c.id
             WHERE u.center_id = ? 
             AND u.role IN ('agent', 'team_leader', 'manager', 'sme')
             AND u.status != 'deleted'
@@ -7074,13 +7071,24 @@ app.get('/api/center-admin/agents', authenticateToken, checkRole(['center_admin'
                 return res.status(500).json({ success: false, error: 'Failed to fetch agents' });
             }
             
-            // Add temp_password field (null for security, can be populated via reset)
-            const agentsWithPassword = agents.map(agent => ({
-                ...agent,
-                temp_password: null // For security, passwords are not stored in plain text
-            }));
-            
-            res.json({ success: true, agents: agentsWithPassword });
+            // Get campaign information for the center
+            db.get(`
+                SELECT c.campaign_name, c.id as campaign_id
+                FROM campaigns c
+                JOIN campaign_center_assignments cca ON c.id = cca.campaign_id
+                WHERE cca.center_id = ? AND cca.status = 'active'
+                LIMIT 1
+            `, [adminUser.center_id], (campaignErr, campaign) => {
+                // Add campaign and temp_password fields to agents
+                const agentsWithData = agents.map(agent => ({
+                    ...agent,
+                    campaign_name: campaign ? campaign.campaign_name : null,
+                    campaign_id: campaign ? campaign.campaign_id : null,
+                    temp_password: null // For security, passwords are not stored in plain text
+                }));
+                
+                res.json({ success: true, agents: agentsWithData });
+            });
         });
     });
 });
