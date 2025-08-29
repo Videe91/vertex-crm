@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import FrontendLogger from './utils/logger'
-import AutoScaler from './components/AutoScaler'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import SuperAdminDashboard from './pages/SuperAdminDashboard'
@@ -41,9 +40,8 @@ function App() {
   return (
     <AuthProvider>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AutoScaler baseWidth={1440} minScale={0.6} maxScale={1.4}>
-          <div className="min-h-screen">
-            <Routes>
+        <div className="min-h-screen">
+          <Routes>
             <Route path="/login" element={<Login />} />
             <Route 
               path="/change-password" 
@@ -210,9 +208,8 @@ function App() {
                 <Route path="/form/:slug" element={<PublicForm />} />
                 
             <Route path="/" element={<Navigate to="/login" replace />} />
-            </Routes>
-          </div>
-        </AutoScaler>
+          </Routes>
+        </div>
       </Router>
     </AuthProvider>
   )

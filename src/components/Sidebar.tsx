@@ -78,8 +78,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isDarkMode, setIsDarkMode, activeItem
   }
 
   return (
-    <div className={`fixed left-4 top-24 bottom-4 z-30 transition-all duration-300 ease-in-out rounded-2xl shadow-2xl flex flex-col scale-smooth ${
-      isCollapsed ? 'w-auto-sidebar-collapsed' : 'w-auto-sidebar'
+    <div className={`fixed left-4 top-24 bottom-4 z-30 transition-all duration-300 ease-in-out rounded-2xl shadow-2xl flex flex-col ${
+      isCollapsed ? 'w-16' : 'w-64'
     } ${
       isDarkMode 
         ? 'bg-gray-900/95 backdrop-blur-xl border border-gray-800/50' 

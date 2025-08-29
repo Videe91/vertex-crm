@@ -169,16 +169,16 @@ const CenterAdminDashboard: React.FC = () => {
       />
       
       {/* Main Content */}
-      <div className="flex-1 transition-all duration-300 scale-smooth" style={{ marginLeft: 'clamp(280px, 20vw, 320px)' }}>
+      <div className="flex-1 ml-24 transition-all duration-300">
         {/* Top Header */}
         <Header title="Center Dashboard" isDarkMode={isDarkMode} />
         
-        <div className="p-auto">
+        <div className="p-8">
           {/* Welcome Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-auto-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <p className={`text-lg ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   Good morning, {user?.name}! Here's what's happening with your center today.
                 </p>
               </div>
