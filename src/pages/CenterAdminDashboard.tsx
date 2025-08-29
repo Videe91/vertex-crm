@@ -169,11 +169,11 @@ const CenterAdminDashboard: React.FC = () => {
       />
       
       {/* Main Content */}
-      <div className="flex-1 ml-24 transition-all duration-300">
+      <div className="flex-1 ml-16 sm:ml-20 lg:ml-24 transition-all duration-300 overflow-x-hidden">
         {/* Top Header */}
         <Header title="Center Dashboard" isDarkMode={isDarkMode} />
         
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-full overflow-x-auto">
           {/* Welcome Section */}
           <div className="mb-8">
             <div className="flex items-center justify-between">

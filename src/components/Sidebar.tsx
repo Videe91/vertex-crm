@@ -78,15 +78,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isDarkMode, setIsDarkMode, activeItem
   }
 
   return (
-    <div className={`fixed left-4 top-24 bottom-4 z-30 transition-all duration-300 ease-in-out rounded-2xl shadow-2xl flex flex-col ${
-      isCollapsed ? 'w-16' : 'w-64'
+    <div className={`fixed left-2 sm:left-4 top-20 sm:top-24 bottom-2 sm:bottom-4 z-30 transition-all duration-300 ease-in-out rounded-2xl shadow-2xl flex flex-col overflow-hidden ${
+      isCollapsed ? 'w-12 sm:w-16' : 'w-56 sm:w-64'
     } ${
       isDarkMode 
         ? 'bg-gray-900/95 backdrop-blur-xl border border-gray-800/50' 
         : 'bg-white/95 backdrop-blur-xl border border-gray-200/50'
     }`}>
       {/* Navigation Menu */}
-      <nav className="flex-1 py-6 pt-8">
+      <nav className="flex-1 py-6 pt-8 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
         <div className="space-y-2 px-3">
           {menuItems.map((item) => {
             const Icon = item.icon
