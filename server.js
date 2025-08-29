@@ -5955,6 +5955,8 @@ app.post('/api/sales-logs/:id/update-status', authenticateToken, checkRole(['cen
 // CAMPAIGN ENDPOINTS
 // GET /api/campaigns - Get all campaigns with client details and center assignments
 app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, res) => {
+    console.log('[API] GET /campaigns: Starting to fetch campaigns');
+    
     const query = `
         SELECT c.*, cl.client_name
         FROM campaigns c
@@ -5963,15 +5965,27 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
         ORDER BY c.created_at DESC
     `;
     
+    console.log('[API] Executing campaigns query:', query);
+    
     db.all(query, [], (err, campaigns) => {
         if (err) {
-            console.error('Error fetching campaigns:', err.message);
+            console.error('Error fetching campaigns - Database error:', err.message);
+            console.error('Full error:', err);
             return res.status(500).json({ success: false, error: 'Internal server error' });
+        }
+        
+        console.log(`[API] Found ${campaigns.length} campaigns`);
+        
+        if (campaigns.length === 0) {
+            console.log('[API] No campaigns found, returning empty array');
+            return res.json([]);
         }
 
         // For each campaign, get its center assignments
         const campaignPromises = campaigns.map(campaign => {
             return new Promise((resolve, reject) => {
+                console.log(`[API] Fetching assignments for campaign ${campaign.id}`);
+                
                 const assignmentQuery = `
                     SELECT 
                         cca.center_id,
@@ -5988,8 +6002,12 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
                 
                 db.all(assignmentQuery, [campaign.id], (err, assignments) => {
                     if (err) {
-                        reject(err);
+                        console.error(`[API] Error fetching assignments for campaign ${campaign.id}:`, err.message);
+                        // Don't reject, just set empty assignments and continue
+                        campaign.center_assignments = [];
+                        resolve(campaign);
                     } else {
+                        console.log(`[API] Found ${assignments.length} assignments for campaign ${campaign.id}`);
                         campaign.center_assignments = assignments;
                         resolve(campaign);
                     }
@@ -5999,10 +6017,12 @@ app.get('/api/campaigns', authenticateToken, checkRole(['super_admin']), (req, r
 
         Promise.all(campaignPromises)
             .then(campaignsWithAssignments => {
-                res.json({ success: true, data: campaignsWithAssignments });
+                console.log(`[API] Successfully processed ${campaignsWithAssignments.length} campaigns with assignments`);
+                res.json(campaignsWithAssignments);
             })
             .catch(err => {
-                console.error('Error fetching campaign assignments:', err.message);
+                console.error('Error processing campaign assignments:', err.message);
+                console.error('Full error:', err);
                 res.status(500).json({ success: false, error: 'Internal server error' });
             });
     });
