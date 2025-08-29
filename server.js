@@ -2986,7 +2986,7 @@ const checkCampaignDuplicate = async (phone, campaignId) => {
         const query = `
             SELECT 
                 ls.id, ls.phone, ls.created_at, ls.center_id, ls.agent_id,
-                c.name as center_name, c.code as center_code,
+                c.center_name, c.center_code,
                 u.first_name, u.last_name, u.username,
                 lf.name as form_name,
                 camp.campaign_name
