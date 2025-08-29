@@ -603,7 +603,7 @@ function initializeDatabase() {
         // CENTERS TABLE - Outsourced centers
         db.run(`CREATE TABLE IF NOT EXISTS centers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            campaign_id INTEGER NOT NULL,
+            campaign_id INTEGER,
             center_name TEXT NOT NULL,
             center_code TEXT UNIQUE NOT NULL,
             address TEXT,
@@ -646,6 +646,8 @@ function initializeDatabase() {
                 console.error('Error adding capacity column:', err.message);
             }
         });
+
+
         
         db.run(`ALTER TABLE centers ADD COLUMN operating_hours TEXT`, (err) => {
             if (err && !err.message.includes('duplicate column name')) {
@@ -2144,8 +2146,23 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                 req.body.admin_password // Store the admin password in centers table
             ], async function(err) {
                 if (err) {
-                    console.error('Error creating center:', err.message);
-                    return res.status(500).json({ success: false, error: 'Failed to create center' });
+                    console.error('Error creating center - Database error:', err.message);
+                    console.error('Full error:', err);
+                    console.error('SQL Query:', query);
+                    console.error('Query parameters:', [
+                        campaignId || null,
+                        centerName,
+                        centerCode,
+                        centerName,
+                        centerCode,
+                        country,
+                        address,
+                        adminName,
+                        status || 'active',
+                        req.user.id,
+                        req.body.admin_password
+                    ]);
+                    return res.status(500).json({ success: false, error: 'Failed to create center: ' + err.message });
                 }
 
                 const centerId = this.lastID;
