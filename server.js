@@ -489,6 +489,20 @@ app.use(express.json({
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve React build assets with proper MIME types
+app.use('/assets', express.static(path.join(__dirname, 'dist', 'assets'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
+
+// Serve other static files from dist
+app.use(express.static(path.join(__dirname, 'dist')));
+
 // Add logging middleware to all API routes
 app.use('/api', SystemLogger.apiStart);
 
@@ -11142,14 +11156,18 @@ app.get('/api/notifications/unread-count', authenticateToken, (req, res) => {
     );
 });
 
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'dist')));
+// Static files are now served at the top of the middleware stack
 
 // Catch-all handler: send back React's index.html file for any non-API routes
 app.get('*', (req, res) => {
     // Skip API routes
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'API endpoint not found' });
+    }
+    
+    // Skip asset requests that should have been handled by static middleware
+    if (req.path.startsWith('/assets/')) {
+        return res.status(404).json({ error: 'Asset not found' });
     }
     
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
