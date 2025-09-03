@@ -112,7 +112,7 @@ const Forms: React.FC = () => {
       name: 'email',
       label: 'Email Address',
       type: 'email',
-      required: true,
+      required: false,
       placeholder: 'Enter your email address'
     },
     {
