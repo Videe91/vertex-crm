@@ -1631,6 +1631,44 @@ const checkRole = (roles) => {
 // AUTHENTICATION ENDPOINTS
 // =====================================================
 
+// Clear account lockout (Super Admin only)
+app.post('/api/auth/clear-lockout', authenticateToken, checkRole(['super_admin']), async (req, res) => {
+    const { username } = req.body;
+    
+    if (!username) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Username is required' 
+        });
+    }
+    
+    try {
+        // Clear failed login attempts
+        SecurityUtils.clearFailedLogins(username);
+        
+        await SystemLogger.info('auth', 'POST /api/auth/clear-lockout', 'Account lockout cleared', {
+            username: username,
+            clearedBy: req.user.username
+        }, req);
+        
+        res.json({
+            success: true,
+            message: `Account lockout cleared for ${username}`
+        });
+        
+    } catch (error) {
+        await SystemLogger.error('auth', 'POST /api/auth/clear-lockout', 'Error clearing lockout', {
+            error: error.message,
+            username: username
+        }, req, error);
+        
+        res.status(500).json({
+            success: false,
+            error: 'Failed to clear account lockout'
+        });
+    }
+});
+
 // Login endpoint
 app.post('/api/auth/login', loginValidation, validateInput, async (req, res) => {
     const { username, password } = req.body;
@@ -1650,13 +1688,23 @@ app.post('/api/auth/login', loginValidation, validateInput, async (req, res) => 
 
     // Check if account is locked
     if (SecurityUtils.isAccountLocked(sanitizedUsername)) {
+        const lockoutInfo = loginAttempts.get(sanitizedUsername);
+        const remainingTime = lockoutInfo?.lockedUntil ? Math.ceil((lockoutInfo.lockedUntil - Date.now()) / 60000) : 0;
+        
         await SystemLogger.warn('auth', 'POST /api/auth/login', 'Login attempt on locked account', {
             username: sanitizedUsername,
-            ip: clientIP
+            ip: clientIP,
+            remainingLockoutMinutes: remainingTime,
+            failedAttempts: lockoutInfo?.count || 0
         }, req);
+        
         return res.status(423).json({ 
             success: false, 
-            error: 'Account temporarily locked due to too many failed attempts. Please try again later.' 
+            error: `Account temporarily locked due to too many failed attempts. Please try again in ${remainingTime} minutes or contact administrator.`,
+            lockoutInfo: {
+                remainingMinutes: remainingTime,
+                failedAttempts: lockoutInfo?.count || 0
+            }
         });
     }
 
@@ -2254,6 +2302,10 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                     console.log('Condition check - admin_username && admin_password:', !!(admin_username && admin_password));
                     
                     if (admin_username && admin_password) {
+                        // Clear any existing failed login attempts for this username
+                        SecurityUtils.clearFailedLogins(admin_username);
+                        console.log('✅ Cleared any existing login attempts for:', admin_username);
+                        
                         // Generate user ID for center admin
                         const timestamp = Date.now().toString().slice(-6);
                         const user_id = `CA${timestamp}`;
@@ -2267,10 +2319,22 @@ app.post('/api/centers', authenticateToken, checkRole(['super_admin']), async (r
                             [user_id, admin_username, hashedPassword, adminName, req.body.adminEmail || '', 'center_admin', centerId, 'active', req.user.id],
                             function(userErr) {
                                 if (userErr) {
-                                    console.error('Error creating center admin user:', userErr.message);
+                                    console.error('❌ Error creating center admin user:', userErr.message);
                                     // Don't fail the center creation, just log the error
+                                } else {
+                                    console.log('✅ Center admin user created successfully:', admin_username);
+                                    console.log('✅ Login credentials - Username:', admin_username, 'Password:', admin_password);
+                                    
+                                    // Test the password immediately after creation
+                                    bcrypt.compare(admin_password, hashedPassword).then(isValid => {
+                                        console.log('✅ Password validation test:', isValid ? 'PASSED' : 'FAILED');
+                                        if (!isValid) {
+                                            console.error('❌ CRITICAL: Password validation failed immediately after creation!');
+                                        }
+                                    }).catch(err => {
+                                        console.error('❌ Error testing password:', err.message);
+                                    });
                                 }
-                                console.log('Center admin user created successfully:', admin_username);
                             }
                         );
                     } else {

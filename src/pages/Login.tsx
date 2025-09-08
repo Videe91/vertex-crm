@@ -14,6 +14,7 @@ const Login: React.FC = () => {
 
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
   const [error, setError] = useState('')
+  const [lockoutInfo, setLockoutInfo] = useState<{remainingMinutes: number, failedAttempts: number} | null>(null)
 
   const { login, isAuthenticated, isLoading: authLoading, user, isDarkMode, setIsDarkMode } = useAuth()
   const navigate = useNavigate()
@@ -22,6 +23,7 @@ const Login: React.FC = () => {
     // Clear error when user starts typing
     if (error && (username || password)) {
       setError('')
+      setLockoutInfo(null)
     }
   }, [username, password, error])
 
@@ -44,6 +46,7 @@ const Login: React.FC = () => {
       }
     } else {
       setError(result.error || 'Login failed')
+      setLockoutInfo(result.lockoutInfo || null)
     }
 
     setIsLoading(false)
@@ -225,7 +228,15 @@ const Login: React.FC = () => {
                     ? 'text-red-400 bg-red-500/10 border-red-500/30' 
                     : 'text-red-600 bg-red-50 border-red-200'
                 }`}>
-                  {error}
+                  <div>{error}</div>
+                  {lockoutInfo && (
+                    <div className="mt-2 text-xs opacity-80">
+                      <div>Failed attempts: {lockoutInfo.failedAttempts}/5</div>
+                      {lockoutInfo.remainingMinutes > 0 && (
+                        <div>Try again in: {lockoutInfo.remainingMinutes} minutes</div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 

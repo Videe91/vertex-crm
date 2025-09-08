@@ -100,12 +100,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         // Ensure user state is cleared on failed login
         setUser(null)
-        return { success: false, error: response.error || 'Login failed' }
+        return { 
+          success: false, 
+          error: response.error || 'Login failed',
+          lockoutInfo: response.lockoutInfo || null
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error)
       // Ensure user state is cleared on error
       setUser(null)
+      
+      // Check if it's a 423 (locked account) error
+      if (error.response?.status === 423) {
+        const errorData = error.response.data
+        return { 
+          success: false, 
+          error: errorData.error || 'Account temporarily locked',
+          lockoutInfo: errorData.lockoutInfo || null
+        }
+      }
+      
       return { success: false, error: 'Connection error. Please try again.' }
     }
   }
