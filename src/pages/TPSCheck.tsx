@@ -166,7 +166,20 @@ const TPSCheck: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading || !phoneNumber}
-                className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                className="flex-1 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                style={{
+                  backgroundColor: isLoading || !phoneNumber ? undefined : '#ea580c',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading && phoneNumber) {
+                    e.currentTarget.style.backgroundColor = '#c2410c';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading && phoneNumber) {
+                    e.currentTarget.style.backgroundColor = '#ea580c';
+                  }
+                }}
               >
                 {isLoading ? (
                   <>
