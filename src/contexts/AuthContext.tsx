@@ -7,7 +7,7 @@ interface AuthContextType {
   isAuthenticated: boolean
   isDarkMode: boolean
   setIsDarkMode: (isDarkMode: boolean) => void
-  login: (username: string, password: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string }>
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string; redirectUrl?: string; lockoutInfo?: { remainingMinutes: number; failedAttempts: number } | null }>
   logout: () => Promise<void>
   updateProfile?: (updatedUser: any) => void
 }

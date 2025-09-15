@@ -15,6 +15,7 @@ import Campaigns from './pages/Campaigns'
 import Centers from './pages/Centers'
 import Forms from './pages/Forms'
 import PublicForm from './pages/PublicForm'
+import TPSCheck from './pages/TPSCheck'
 import SalesLogs from './pages/SalesLogs'
 import AgentDashboard from './pages/AgentDashboard'
 import AgentLeadForm from './pages/AgentLeadForm'
@@ -204,8 +205,9 @@ function App() {
               } 
             />
                 
-                {/* Public Form Route - No Authentication Required */}
+                {/* Public Routes - No Authentication Required */}
                 <Route path="/form/:slug" element={<PublicForm />} />
+                <Route path="/tps-check" element={<TPSCheck />} />
                 
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>

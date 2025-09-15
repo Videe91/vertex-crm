@@ -30,6 +30,11 @@ export interface LoginResponse {
   user: User
   firstLogin?: boolean
   error?: string
+  lockoutInfo?: {
+    isLocked: boolean
+    remainingTime?: number
+    failedAttempts?: number
+  }
 }
 
 export interface ApiResponse<T = any> {

@@ -4609,6 +4609,72 @@ app.delete('/api/clients/:id', authenticateToken, checkRole(['super_admin']), (r
 });
 
 // =====================================================
+// TPS CHECK ENDPOINT
+// =====================================================
+
+// POST /api/tps/check - Check if phone number is on TPS list
+app.post('/api/tps/check', async (req, res) => {
+    try {
+        const { phone } = req.body;
+        
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                error: 'Phone number is required'
+            });
+        }
+
+        // Clean phone number (remove all non-digits)
+        const cleanPhone = phone.replace(/\D/g, '');
+        
+        // Validate phone number format (10 digits)
+        if (cleanPhone.length !== 10) {
+            return res.status(400).json({
+                success: false,
+                error: 'Please provide a valid 10-digit phone number'
+            });
+        }
+
+        // TODO: Replace with actual TPS API integration
+        // For now, return mock data
+        const mockResult = {
+            number: phone,
+            cleanNumber: cleanPhone,
+            isOnTPS: Math.random() > 0.5, // Random for demo
+            message: Math.random() > 0.5 ? 'Number is registered on TPS list' : 'Number is not on TPS list',
+            checkedAt: new Date().toISOString(),
+            source: 'TPS_API_MOCK' // Will be changed to actual API
+        };
+
+        // Log the TPS check for audit purposes
+        SystemLogger.log('TPS_CHECK', 'info', 'TPS number check performed', {
+            phone: cleanPhone,
+            result: mockResult.isOnTPS ? 'ON_TPS' : 'NOT_ON_TPS',
+            ip: req.ip,
+            userAgent: req.get('User-Agent')
+        });
+
+        res.json({
+            success: true,
+            data: mockResult
+        });
+
+    } catch (error) {
+        console.error('Error in TPS check:', error);
+        SystemLogger.log('TPS_CHECK_ERROR', 'error', 'TPS check failed', {
+            error: error.message,
+            phone: req.body.phone,
+            ip: req.ip
+        });
+        
+        res.status(500).json({
+            success: false,
+            error: 'Failed to check TPS status'
+        });
+    }
+});
+
+// =====================================================
 // START SERVER
 // =====================================================
 
