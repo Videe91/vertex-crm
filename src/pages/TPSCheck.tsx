@@ -14,31 +14,16 @@ const TPSCheck: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const formatPhoneNumber = (value: string) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
-    
-    // Format as (XXX) XXX-XXXX
-    if (digits.length >= 10) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-    } else if (digits.length >= 6) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    } else if (digits.length >= 3) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    }
-    return digits;
-  };
-
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value);
-    setPhoneNumber(formatted);
+    // Only allow digits, limit to 10 characters
+    const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setPhoneNumber(digits);
     setError('');
     setResult(null);
   };
 
   const validatePhoneNumber = (phone: string) => {
-    const digits = phone.replace(/\D/g, '');
-    return digits.length === 10;
+    return phone.length === 10 && /^\d{10}$/.test(phone);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,9 +38,7 @@ const TPSCheck: React.FC = () => {
     setError('');
 
     try {
-      const cleanNumber = phoneNumber.replace(/\D/g, '');
-      
-      // Call the TPS check API
+      // Call the TPS check API with clean digits
       const response = await fetch('/api/tps/check', {
         method: 'POST',
         headers: {
@@ -149,7 +132,8 @@ const TPSCheck: React.FC = () => {
                   id="phone"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  placeholder="(555) 123-4567"
+                  placeholder="5551234567"
+                  maxLength={10}
                   className="w-full pl-10 pr-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   disabled={isLoading}
                 />
