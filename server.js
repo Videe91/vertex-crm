@@ -4660,8 +4660,11 @@ app.post('/api/tps/check', async (req, res) => {
         console.log('TPS API Response:', tpsData);
 
         // Parse TPS response
-        const isOnTPS = tpsData.result && tpsData.result.toLowerCase().includes('found on the tps');
-        const message = tpsData.result || 'TPS status unknown';
+        // If result contains "Not found on the TPS" = number is NOT on TPS (safe to call)
+        // If result contains "found on the TPS" = number IS on TPS (do not call)
+        const resultText = tpsData.result || '';
+        const isOnTPS = resultText.toLowerCase().includes('found on the tps') && !resultText.toLowerCase().includes('not found');
+        const message = resultText || 'TPS status unknown';
 
         const result = {
             number: phone,
