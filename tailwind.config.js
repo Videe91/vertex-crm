@@ -4,6 +4,14 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'bg-orange-600',
+    'bg-orange-700',
+    'hover:bg-orange-700',
+    'bg-amber-600',
+    'bg-amber-700',
+    'hover:bg-amber-700',
+  ],
   theme: {
     extend: {
       colors: {
