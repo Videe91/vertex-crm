@@ -4635,28 +4635,56 @@ app.post('/api/tps/check', async (req, res) => {
             });
         }
 
-        // TODO: Replace with actual TPS API integration
-        // For now, return mock data
-        const mockResult = {
+        // TPS Unlimited API Configuration
+        const TPS_API_KEY = '8428cbedb320de9f75c5ce48282b6a5486b7d916';
+        const TPS_PASSWORD = '75da810e108456b4797e154aaaceb1dbe6bacdae';
+        const TPS_API_URL = 'https://www.tpsunlimited.com/api/check';
+
+        // Call TPS Unlimited API
+        const tpsUrl = `${TPS_API_URL}?api_key=${TPS_API_KEY}&password=${TPS_PASSWORD}&number=${cleanPhone}`;
+        
+        console.log('Calling TPS API:', tpsUrl.replace(TPS_API_KEY, 'API_KEY_HIDDEN').replace(TPS_PASSWORD, 'PASSWORD_HIDDEN'));
+        
+        const tpsResponse = await fetch(tpsUrl, {
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Vertex-CRM-TPS-Check/1.0'
+            }
+        });
+
+        if (!tpsResponse.ok) {
+            throw new Error(`TPS API returned ${tpsResponse.status}: ${tpsResponse.statusText}`);
+        }
+
+        const tpsData = await tpsResponse.json();
+        console.log('TPS API Response:', tpsData);
+
+        // Parse TPS response
+        const isOnTPS = tpsData.result && tpsData.result.toLowerCase().includes('found on the tps');
+        const message = tpsData.result || 'TPS status unknown';
+
+        const result = {
             number: phone,
             cleanNumber: cleanPhone,
-            isOnTPS: Math.random() > 0.5, // Random for demo
-            message: Math.random() > 0.5 ? 'Number is registered on TPS list' : 'Number is not on TPS list',
+            isOnTPS: isOnTPS,
+            message: message,
             checkedAt: new Date().toISOString(),
-            source: 'TPS_API_MOCK' // Will be changed to actual API
+            source: 'TPS_UNLIMITED_API',
+            rawResponse: tpsData
         };
 
         // Log the TPS check for audit purposes
         SystemLogger.log('TPS_CHECK', 'info', 'TPS number check performed', {
             phone: cleanPhone,
-            result: mockResult.isOnTPS ? 'ON_TPS' : 'NOT_ON_TPS',
+            result: result.isOnTPS ? 'ON_TPS' : 'NOT_ON_TPS',
+            tpsResult: tpsData.result,
             ip: req.ip,
             userAgent: req.get('User-Agent')
         });
 
         res.json({
             success: true,
-            data: mockResult
+            data: result
         });
 
     } catch (error) {
