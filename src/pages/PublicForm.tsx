@@ -227,7 +227,7 @@ const PublicForm: React.FC = () => {
             </div>
             <div className="bg-slate-700 rounded-lg px-3 py-2 text-center">
               <div className="text-xs text-slate-300 font-medium">Transfer Number</div>
-              <div className="text-sm font-bold text-blue-400">+1-833-539-7305</div>
+              <div className="text-sm font-bold text-blue-400">855-360-1251</div>
             </div>
           </div>
 
